@@ -383,27 +383,63 @@ outs:
           </div>
 
           <div className="dash-grid">
-            {/* Earn Section */}
+            {/* Earn Section - Realistic Actions */}
             <section className="dash-card">
-              <h3>⚡ Earn Tokens</h3>
-              <div className="earn-grid">
-                <button className="earn-btn" onClick={() => handleMint(500)} disabled={state.completed.includes('welcome')}>
-                  <span className="earn-amount">+500</span>
-                  <span>Welcome</span>
-                </button>
-                <button className="earn-btn" onClick={handleDailyCheckin}>
-                  <span className="earn-amount">+{Math.min(25 + state.streak * 25, 175)}</span>
-                  <span>Daily</span>
-                </button>
-                <button className="earn-btn" onClick={() => handleMint(100)}>
-                  <span className="earn-amount">+100</span>
-                  <span>Purchase</span>
-                </button>
-                <button className="earn-btn spin" onClick={handleSpin} disabled={!state.spinAvailable}>
-                  <span className="earn-amount">🎰</span>
-                  <span>{state.spinAvailable ? 'Spin!' : 'Done'}</span>
-                </button>
+              <h3>⚡ How to Earn REWA</h3>
+              <div className="earn-actions">
+                <div className={`earn-action ${wallet.connected ? 'completed' : ''}`}>
+                  <div className="earn-action-info">
+                    <span className="earn-action-icon">🔗</span>
+                    <div>
+                      <div className="earn-action-title">Connect Wallet</div>
+                      <div className="earn-action-desc">Link your Bitcoin wallet</div>
+                    </div>
+                  </div>
+                  <div className="earn-action-reward">
+                    {wallet.connected ? <span className="completed-badge">✓ Done</span> : <span className="earn-tokens">+500</span>}
+                  </div>
+                </div>
+
+                <div className={`earn-action ${state.lastDaily === new Date().toDateString() ? 'completed' : ''}`} onClick={handleDailyCheckin}>
+                  <div className="earn-action-info">
+                    <span className="earn-action-icon">📅</span>
+                    <div>
+                      <div className="earn-action-title">Daily Check-in</div>
+                      <div className="earn-action-desc">Visit once per day ({state.streak}🔥 streak)</div>
+                    </div>
+                  </div>
+                  <div className="earn-action-reward">
+                    {state.lastDaily === new Date().toDateString() ? <span className="completed-badge">✓ Claimed</span> : <span className="earn-tokens">+{Math.min(25 + state.streak * 25, 175)}</span>}
+                  </div>
+                </div>
+
+                <div className="earn-action disabled">
+                  <div className="earn-action-info">
+                    <span className="earn-action-icon">🛒</span>
+                    <div>
+                      <div className="earn-action-title">Make a Purchase</div>
+                      <div className="earn-action-desc">1 REWA per $1 spent</div>
+                    </div>
+                  </div>
+                  <div className="earn-action-reward">
+                    <span className="earn-tokens">+1/$ </span>
+                  </div>
+                </div>
+
+                <div className="earn-action disabled">
+                  <div className="earn-action-info">
+                    <span className="earn-action-icon">👥</span>
+                    <div>
+                      <div className="earn-action-title">Refer a Friend</div>
+                      <div className="earn-action-desc">Share your referral code</div>
+                    </div>
+                  </div>
+                  <div className="earn-action-reward">
+                    <span className="earn-tokens">+200</span>
+                  </div>
+                </div>
               </div>
+              <p className="earn-note">💡 Tokens are minted on Bitcoin when actions are verified</p>
             </section>
 
             {/* Redeem Section */}
