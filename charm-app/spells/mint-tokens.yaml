@@ -1,0 +1,42 @@
+# CharmRewards Mint Spell
+# Creates new loyalty tokens for a recipient
+#
+# Usage:
+# 1. Set environment variables (app_vk, in_utxo_0, addr_0)
+# 2. Run: cat mint-tokens.yaml | envsubst | charms spell check
+
+version: 8
+
+# Apps involved in this spell
+apps:
+  # NFT controlling the token (mint authority)
+  $0000: n/${app_id}/${app_vk}
+  # Fungible loyalty token
+  $0001: t/${app_id}/${app_vk}
+
+# Input UTXOs to spend
+ins:
+  # NFT input (merchant's mint authority)
+  - utxo_id: ${in_utxo_0}
+    charms:
+      $0000:
+        ticker: REWA
+        remaining: ${remaining_supply}
+        max_supply: 1000000
+        issuer: "CharmRewards Demo"
+
+# Output UTXOs to create
+outs:
+  # Return NFT to merchant with updated remaining supply
+  - address: ${merchant_addr}
+    charms:
+      $0000:
+        ticker: REWA
+        remaining: ${new_remaining}
+        max_supply: 1000000
+        issuer: "CharmRewards Demo"
+  
+  # Send tokens to recipient
+  - address: ${recipient_addr}
+    charms:
+      $0001: ${mint_amount}

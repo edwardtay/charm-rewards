@@ -1,0 +1,34 @@
+# CharmRewards Transfer Spell
+# Transfers loyalty tokens between users
+#
+# Usage:
+# 1. Set environment variables (app_vk, in_utxo_0, addr_0)
+# 2. Run: cat transfer-tokens.yaml | envsubst | charms spell check
+
+version: 8
+
+# Apps involved in this spell
+apps:
+  # Fungible loyalty token
+  $0000: t/${app_id}/${app_vk}
+
+# Input UTXOs to spend
+ins:
+  # Sender's tokens
+  - utxo_id: ${sender_utxo}
+    charms:
+      $0000: ${sender_balance}
+
+# Output UTXOs
+outs:
+  # Tokens to recipient
+  - address: ${recipient_addr}
+    charms:
+      $0000: ${transfer_amount}
+  
+  # Change back to sender (if any)
+  - address: ${sender_addr}
+    charms:
+      $0000: ${sender_change}
+
+# Conservation rule: sender_balance == transfer_amount + sender_change

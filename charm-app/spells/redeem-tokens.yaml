@@ -1,0 +1,30 @@
+# CharmRewards Redeem Spell
+# Burns loyalty tokens to claim a reward
+#
+# Usage:
+# 1. Set environment variables (app_vk, in_utxo_0, addr_0)
+# 2. Run: cat redeem-tokens.yaml | envsubst | charms spell check
+
+version: 8
+
+# Apps involved in this spell
+apps:
+  # Fungible loyalty token to burn
+  $0000: t/${app_id}/${app_vk}
+
+# Input UTXOs to spend (user's tokens)
+ins:
+  - utxo_id: ${user_utxo}
+    charms:
+      $0000: ${user_balance}
+
+# Output UTXOs (remaining tokens after burn)
+outs:
+  # Return remaining tokens to user (balance - burn_amount)
+  - address: ${user_addr}
+    charms:
+      $0000: ${remaining_after_burn}
+
+# Note: The difference between input and output is the burned amount
+# burned_amount = user_balance - remaining_after_burn
+# This burned amount is redeemed for reward_id: ${reward_id}

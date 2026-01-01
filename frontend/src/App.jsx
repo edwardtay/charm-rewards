@@ -1,0 +1,502 @@
+import { useState, useEffect, useRef } from 'react'
+import { getAddress, AddressPurpose, BitcoinNetworkType } from 'sats-connect'
+import './App.css'
+
+const STORAGE_KEY = 'charmrewards_v5'
+const genHash = () => [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+const genAddr = () => 'tb1p' + [...Array(58)].map(() => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')
+
+const TOKEN = { ticker: 'REWA', maxSupply: 1000000, appId: 'charmrewards' }
+
+const REWARDS = [
+  { id: 'r1', name: '10% Off', cost: 200, icon: '🏷️' },
+  { id: 'r2', name: 'Free Shipping', cost: 300, icon: '📦' },
+  { id: 'r3', name: '$5 Credit', cost: 500, icon: '💵' },
+  { id: 'r4', name: 'NFT Badge', cost: 1000, icon: '🎖️' },
+]
+
+const ACHIEVEMENTS = [
+  { id: 'first_earn', name: 'First Steps', icon: '🌟', check: s => s.totalEarned > 0 },
+  { id: 'first_burn', name: 'Big Spender', icon: '🔥', check: s => s.totalRedeemed > 0 },
+  { id: '1k_club', name: '1K Club', icon: '💎', check: s => s.totalEarned >= 1000 },
+  { id: 'streak_3', name: 'On Fire', icon: '🔥', check: s => s.streak >= 3 },
+  { id: 'streak_7', name: 'Dedicated', icon: '⭐', check: s => s.streak >= 7 },
+]
+
+const LEADERBOARD = [
+  { name: 'satoshi.btc', earned: 12500, rank: 1 },
+  { name: 'vitalik.eth', earned: 9800, rank: 2 },
+  { name: 'cz_binance', earned: 7200, rank: 3 },
+  { name: 'elonmusk', earned: 5400, rank: 4 },
+  { name: 'naval', earned: 4100, rank: 5 },
+]
+
+const getDefault = () => ({
+  balance: 0, totalEarned: 0, totalRedeemed: 0,
+  address: genAddr(), txs: [], completed: [],
+  streak: 0, lastDaily: null, spinAvailable: true,
+  created: new Date().toISOString()
+})
+
+// Rust contract for display
+const RUST_CONTRACT = `#[app_contract]
+pub fn app_contract(
+    app: &App,
+    tx: &Transaction,
+    x: &Data,    // Public input
+    w: &Data,    // Private witness
+) -> bool {
+    let action: Action = x.deserialize();
+    match action {
+        Action::Mint { to, amount } => {
+            verify_mint(app, tx, to, amount)
+        }
+        Action::Burn { amount, reward_id } => {
+            verify_burn(app, tx, amount, reward_id)
+        }
+        Action::Transfer { from, to, amount } => {
+            verify_transfer(app, tx, from, to, amount)
+        }
+    }
+}`
+
+function App() {
+  const [state, setState] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      return saved ? { ...getDefault(), ...JSON.parse(saved) } : getDefault()
+    } catch { return getDefault() }
+  })
+
+  const [view, setView] = useState('home') // 'home' or 'dashboard'
+  const [techTab, setTechTab] = useState('contract')
+  const [wallet, setWallet] = useState({ connected: false, type: null, address: null })
+  const [showWalletModal, setShowWalletModal] = useState(false)
+  const [toast, setToast] = useState(null)
+  const [confetti, setConfetti] = useState(false)
+  const [showSpin, setShowSpin] = useState(false)
+  const [spinResult, setSpinResult] = useState(null)
+
+  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) }, [state])
+  useEffect(() => {
+    const pending = state.txs.filter(t => t.status === 'pending')
+    if (pending.length) {
+      const timer = setTimeout(() => {
+        setState(s => ({ ...s, txs: s.txs.map(t => t.status === 'pending' ? { ...t, status: 'confirmed' } : t) }))
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [state.txs])
+
+  const notify = (msg, type = 'success') => {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  const fireConfetti = () => {
+    setConfetti(true)
+    setTimeout(() => setConfetti(false), 1500)
+  }
+
+  // Wallet detection and connection
+  const detectWallets = () => [
+    { id: 'xverse', name: 'Xverse', logo: '/wallets/xverse.svg', desc: 'Recommended for BOS', available: true },
+    { id: 'leather', name: 'Leather', logo: '/wallets/leather.svg', desc: 'Stacks & Bitcoin', available: typeof window !== 'undefined' && !!window.LeatherProvider },
+    { id: 'unisat', name: 'Unisat', logo: '/wallets/unisat.svg', desc: 'Ordinals & BRC-20', available: typeof window !== 'undefined' && !!window.unisat },
+    { id: 'okx', name: 'OKX Wallet', logo: '/wallets/okx.svg', desc: 'Multi-chain', available: typeof window !== 'undefined' && !!window.okxwallet?.bitcoin },
+  ]
+
+  const connectWallet = async (walletId) => {
+    try {
+      if (walletId === 'xverse') {
+        await getAddress({
+          payload: {
+            purposes: [AddressPurpose.Payment, AddressPurpose.Ordinals],
+            message: 'CharmRewards - Bitcoin Loyalty Tokens',
+            network: { type: BitcoinNetworkType.Testnet },
+          },
+          onFinish: (response) => {
+            const paymentAddr = response.addresses.find(a => a.purpose === AddressPurpose.Payment)
+            if (paymentAddr) {
+              setWallet({ connected: true, type: 'xverse', address: paymentAddr.address })
+              setState(s => ({ ...s, address: paymentAddr.address }))
+              notify('✅ Wallet connected!')
+              setShowWalletModal(false)
+            }
+          },
+          onCancel: () => notify('Connection cancelled', 'error'),
+        })
+      } else if (walletId === 'unisat' && window.unisat) {
+        const accounts = await window.unisat.requestAccounts()
+        if (accounts[0]) {
+          setWallet({ connected: true, type: 'unisat', address: accounts[0] })
+          setState(s => ({ ...s, address: accounts[0] }))
+          notify('✅ Wallet connected!')
+          setShowWalletModal(false)
+        }
+      } else {
+        notify('Please install the wallet extension', 'error')
+      }
+    } catch (err) {
+      notify('Connection failed', 'error')
+    }
+  }
+
+  const addTx = (type, amount, desc, extra = {}) => {
+    setState(s => ({
+      ...s,
+      txs: [{
+        id: genHash(),
+        type,
+        amount,
+        desc,
+        date: new Date().toISOString(),
+        status: 'pending',
+        spell: { version: 8, action: type.toUpperCase(), app: `t/${TOKEN.appId}`, amount, ...extra }
+      }, ...s.txs]
+    }))
+  }
+
+  const handleMint = (amount) => {
+    setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
+    addTx('mint', amount, `Mint ${amount} REWA`, { to: state.address })
+    notify(`+${amount} ${TOKEN.ticker}`)
+    fireConfetti()
+  }
+
+  const handleBurn = (reward) => {
+    if (state.balance < reward.cost) return notify('Insufficient balance', 'error')
+    setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
+    addTx('burn', -reward.cost, reward.name, { rewardId: reward.id })
+    notify(`Redeemed: ${reward.name}`)
+    fireConfetti()
+  }
+
+  const handleSpin = () => {
+    if (!state.spinAvailable) return
+    setShowSpin(true)
+    const prizes = [25, 50, 100, 200, 500]
+    const result = prizes[Math.floor(Math.random() * prizes.length)]
+    setTimeout(() => {
+      setSpinResult(result)
+      setState(s => ({ ...s, balance: s.balance + result, totalEarned: s.totalEarned + result, spinAvailable: false }))
+      addTx('mint', result, 'Lucky Spin', { to: state.address })
+      fireConfetti()
+    }, 2000)
+  }
+
+  const handleDailyCheckin = () => {
+    const today = new Date().toDateString()
+    const lastDay = state.lastDaily ? new Date(state.lastDaily).toDateString() : null
+    if (lastDay === today) return notify('Already claimed today!', 'error')
+
+    const yesterday = new Date(Date.now() - 86400000).toDateString()
+    const newStreak = lastDay === yesterday ? state.streak + 1 : 1
+    const bonus = Math.min(25 + (newStreak - 1) * 25, 175)
+
+    setState(s => ({ ...s, streak: newStreak, lastDaily: new Date().toISOString(), balance: s.balance + bonus, totalEarned: s.totalEarned + bonus }))
+    addTx('mint', bonus, 'Daily Check-in', { to: state.address })
+    notify(`+${bonus} REWA (${newStreak}🔥 streak)`)
+    fireConfetti()
+  }
+
+  // Spell YAML for display
+  const generateSpell = (action, amount) => `version: 8
+apps:
+  $0: t/${TOKEN.appId}/${genHash().slice(0, 8)}
+
+ins:
+  - utxo_id: ${genHash().slice(0, 16)}...
+    charms:
+      $0: ${state.balance}
+
+outs:
+  - address: ${state.address.slice(0, 20)}...
+    charms:
+      $0: ${action === 'mint' ? state.balance + amount : state.balance - amount}
+
+# Action: ${action.toUpperCase()}
+# Amount: ${action === 'mint' ? '+' : '-'}${amount} REWA`
+
+  const unlockedAch = ACHIEVEMENTS.filter(a => a.check(state))
+  const myLeaderPos = LEADERBOARD.findIndex(l => state.totalEarned > l.earned) + 1 || LEADERBOARD.length + 1
+
+  return (
+    <div className="app">
+      {confetti && <div className="confetti">🎉</div>}
+
+      {/* Header */}
+      <header className="header">
+        <div className="logo">✨ CharmRewards</div>
+        <nav className="nav">
+          <button className={`nav-btn ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>Protocol</button>
+          <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}>Dashboard</button>
+        </nav>
+        <div className="header-actions">
+          {wallet.connected ? (
+            <button className="wallet-btn connected" onClick={() => setWallet({ connected: false, type: null, address: null })}>
+              <span className="wallet-indicator"></span>
+              {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+            </button>
+          ) : (
+            <button className="wallet-btn" onClick={() => setShowWalletModal(true)}>Connect Wallet</button>
+          )}
+        </div>
+      </header>
+
+      {/* HOME VIEW - Technical Focus */}
+      {view === 'home' && (
+        <main className="main-home">
+          {/* Hero */}
+          <section className="hero">
+            <h1>Bitcoin-Native Loyalty Tokens</h1>
+            <p className="subtitle">Programmable rewards on Bitcoin using Charms Protocol + BOS zkVM</p>
+            <div className="hero-stats">
+              <div className="hero-stat">
+                <span className="hero-value">{state.balance.toLocaleString()}</span>
+                <span className="hero-label">REWA Balance</span>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-value">{state.txs.length}</span>
+                <span className="hero-label">Transactions</span>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-value">1M</span>
+                <span className="hero-label">Max Supply</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Grid */}
+          <section className="features">
+            <div className="feature">
+              <div className="feature-icon">₿</div>
+              <h3>Bitcoin-Secured</h3>
+              <p>Tokens exist as enchanted UTXOs on Bitcoin L1, not a separate chain</p>
+            </div>
+            <div className="feature">
+              <div className="feature-icon">🔐</div>
+              <h3>zkVM Verified</h3>
+              <p>Every transaction generates a zero-knowledge proof verified on-chain</p>
+            </div>
+            <div className="feature">
+              <div className="feature-icon">⚡</div>
+              <h3>Programmable</h3>
+              <p>Rust smart contracts define mint, burn, and transfer rules</p>
+            </div>
+            <div className="feature">
+              <div className="feature-icon">🌐</div>
+              <h3>Cross-Chain</h3>
+              <p>Beam tokens to Cardano, Litecoin, or any UTXO chain without bridges</p>
+            </div>
+          </section>
+
+          {/* Technical Section */}
+          <section className="tech-section">
+            <h2>🔬 Charms SDK Integration</h2>
+            <div className="tech-tabs">
+              <button className={`tech-tab ${techTab === 'contract' ? 'active' : ''}`} onClick={() => setTechTab('contract')}>Rust Contract</button>
+              <button className={`tech-tab ${techTab === 'spell' ? 'active' : ''}`} onClick={() => setTechTab('spell')}>Spell YAML</button>
+              <button className={`tech-tab ${techTab === 'proof' ? 'active' : ''}`} onClick={() => setTechTab('proof')}>Proof Pipeline</button>
+            </div>
+            <div className="tech-content">
+              {techTab === 'contract' && (
+                <pre className="code-block">{RUST_CONTRACT}</pre>
+              )}
+              {techTab === 'spell' && (
+                <pre className="code-block">{generateSpell('mint', 100)}</pre>
+              )}
+              {techTab === 'proof' && (
+                <div className="proof-pipeline">
+                  <div className="proof-step"><span className="proof-icon">📝</span><span>Spell</span></div>
+                  <span className="proof-arrow">→</span>
+                  <div className="proof-step"><span className="proof-icon">⚙️</span><span>Contract</span></div>
+                  <span className="proof-arrow">→</span>
+                  <div className="proof-step"><span className="proof-icon">🔐</span><span>zkVM</span></div>
+                  <span className="proof-arrow">→</span>
+                  <div className="proof-step"><span className="proof-icon">₿</span><span>Bitcoin</span></div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Demo Actions */}
+          <section className="demo-section">
+            <h2>⚡ Try It</h2>
+            <div className="demo-actions">
+              <button className="demo-btn mint" onClick={() => handleMint(100)}>
+                <span>Mint 100 REWA</span>
+                <small>Creates enchanted UTXO</small>
+              </button>
+              <button className="demo-btn burn" onClick={() => handleBurn(REWARDS[0])} disabled={state.balance < 200}>
+                <span>Burn for 10% Off</span>
+                <small>Destroys tokens for reward</small>
+              </button>
+            </div>
+          </section>
+
+          {/* Transaction History */}
+          {state.txs.length > 0 && (
+            <section className="tx-section">
+              <h2>📜 Recent Transactions</h2>
+              <div className="tx-list">
+                {state.txs.slice(0, 5).map(tx => (
+                  <div key={tx.id} className="tx-row">
+                    <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
+                    <span className="tx-desc">{tx.desc}</span>
+                    <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
+                    <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
+                    <code className="tx-hash">{tx.id.slice(0, 8)}...</code>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </main>
+      )}
+
+      {/* DASHBOARD VIEW - Gamification */}
+      {view === 'dashboard' && (
+        <main className="main-dashboard">
+          {/* Stats Bar */}
+          <div className="dash-stats">
+            <div className="dash-stat main">
+              <span className="dash-value">{state.balance.toLocaleString()}</span>
+              <span className="dash-label">REWA</span>
+            </div>
+            <div className="dash-stat">
+              <span className="dash-value">🔥 {state.streak}</span>
+              <span className="dash-label">Streak</span>
+            </div>
+            <div className="dash-stat">
+              <span className="dash-value">#{myLeaderPos}</span>
+              <span className="dash-label">Rank</span>
+            </div>
+          </div>
+
+          <div className="dash-grid">
+            {/* Earn Section */}
+            <section className="dash-card">
+              <h3>⚡ Earn Tokens</h3>
+              <div className="earn-grid">
+                <button className="earn-btn" onClick={() => handleMint(500)} disabled={state.completed.includes('welcome')}>
+                  <span className="earn-amount">+500</span>
+                  <span>Welcome</span>
+                </button>
+                <button className="earn-btn" onClick={handleDailyCheckin}>
+                  <span className="earn-amount">+{Math.min(25 + state.streak * 25, 175)}</span>
+                  <span>Daily</span>
+                </button>
+                <button className="earn-btn" onClick={() => handleMint(100)}>
+                  <span className="earn-amount">+100</span>
+                  <span>Purchase</span>
+                </button>
+                <button className="earn-btn spin" onClick={handleSpin} disabled={!state.spinAvailable}>
+                  <span className="earn-amount">🎰</span>
+                  <span>{state.spinAvailable ? 'Spin!' : 'Done'}</span>
+                </button>
+              </div>
+            </section>
+
+            {/* Redeem Section */}
+            <section className="dash-card">
+              <h3>🎁 Redeem Rewards</h3>
+              <div className="rewards-list">
+                {REWARDS.map(r => (
+                  <div key={r.id} className={`reward-row ${state.balance < r.cost ? 'locked' : ''}`}>
+                    <span>{r.icon}</span>
+                    <span className="reward-name">{r.name}</span>
+                    <span className="reward-cost">{r.cost}</span>
+                    <button className="btn-sm" onClick={() => handleBurn(r)} disabled={state.balance < r.cost}>
+                      {state.balance >= r.cost ? 'Get' : `+${r.cost - state.balance}`}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Achievements */}
+            <section className="dash-card">
+              <h3>🎖️ Achievements ({unlockedAch.length}/{ACHIEVEMENTS.length})</h3>
+              <div className="ach-grid">
+                {ACHIEVEMENTS.map(a => (
+                  <div key={a.id} className={`ach-item ${a.check(state) ? 'unlocked' : ''}`}>
+                    <span className="ach-icon">{a.icon}</span>
+                    <span className="ach-name">{a.name}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Leaderboard */}
+            <section className="dash-card">
+              <h3>🏆 Leaderboard</h3>
+              <div className="leader-list">
+                {LEADERBOARD.map(l => (
+                  <div key={l.rank} className="leader-row">
+                    <span className="leader-rank">#{l.rank}</span>
+                    <span className="leader-name">{l.name}</span>
+                    <span className="leader-score">{l.earned.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className="leader-row you">
+                  <span className="leader-rank">#{myLeaderPos}</span>
+                  <span className="leader-name">You</span>
+                  <span className="leader-score">{state.totalEarned.toLocaleString()}</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      )}
+
+      {/* Footer */}
+      <footer className="footer">
+        Built on <a href="https://charms.dev" target="_blank" rel="noopener">Charms Protocol</a> + <a href="https://bitcoinos.build" target="_blank" rel="noopener">BitcoinOS</a>
+      </footer>
+
+      {/* Wallet Modal */}
+      {showWalletModal && (
+        <div className="modal-overlay" onClick={() => setShowWalletModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">🔗 Connect to BOS <button onClick={() => setShowWalletModal(false)}>×</button></div>
+            <div className="modal-body">
+              <div className="bos-info">
+                <strong>BitcoinOS (BOS)</strong> enables programmable Bitcoin via zkSNARK proofs.
+              </div>
+              <p className="wallet-label">Select a wallet:</p>
+              {detectWallets().map(w => (
+                <button key={w.id} className={`wallet-option ${!w.available && w.id !== 'xverse' ? 'disabled' : ''}`} onClick={() => connectWallet(w.id)}>
+                  <img src={w.logo} alt={w.name} className="wallet-logo" />
+                  <div className="wallet-info">
+                    <div className="wallet-name">{w.name}</div>
+                    <div className="wallet-desc">{w.desc}</div>
+                  </div>
+                  {!w.available && w.id !== 'xverse' && <span className="wallet-badge">Not installed</span>}
+                </button>
+              ))}
+              <div className="network-info">
+                <span>Network</span><span className="network-value">Bitcoin Testnet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Spin Modal */}
+      {showSpin && (
+        <div className="modal-overlay">
+          <div className="modal spin-modal">
+            <div className="spin-wheel">{spinResult ? `🎉 +${spinResult}` : '🎰'}</div>
+            {spinResult && <button className="btn-primary" onClick={() => { setShowSpin(false); setSpinResult(null) }}>Collect!</button>}
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
+    </div>
+  )
+}
+
+export default App
