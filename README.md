@@ -4,6 +4,8 @@
 
 Programmable loyalty tokens on Bitcoin. Earn, redeem, and transfer tokens — all secured by zkVM proofs.
 
+![CharmRewards Demo](./demo-screenshot.png)
+
 ## Features
 
 - 🔗 **Wallet Connection** — Xverse, Unisat, Leather support
