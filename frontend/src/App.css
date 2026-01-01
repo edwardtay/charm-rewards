@@ -267,6 +267,68 @@ body {
   border-radius: 8px;
 }
 
+.proof-pipeline.animated .proof-step {
+  opacity: 0;
+  animation: stepFadeIn 0.5s ease forwards;
+}
+
+.proof-pipeline.animated .step-1 {
+  animation-delay: 0s;
+}
+
+.proof-pipeline.animated .step-2 {
+  animation-delay: 0.3s;
+}
+
+.proof-pipeline.animated .step-3 {
+  animation-delay: 0.6s;
+}
+
+.proof-pipeline.animated .step-4 {
+  animation-delay: 0.9s;
+}
+
+.proof-pipeline.animated .proof-arrow {
+  opacity: 0;
+  animation: arrowSlide 0.3s ease forwards;
+}
+
+.proof-pipeline.animated .anim-1 {
+  animation-delay: 0.15s;
+}
+
+.proof-pipeline.animated .anim-2 {
+  animation-delay: 0.45s;
+}
+
+.proof-pipeline.animated .anim-3 {
+  animation-delay: 0.75s;
+}
+
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes arrowSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .proof-step {
   display: flex;
   flex-direction: column;
@@ -276,6 +338,18 @@ body {
   background: var(--surface2);
   border-radius: 8px;
   font-size: 12px;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.proof-step:hover {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.proof-step small {
+  font-size: 10px;
+  color: var(--text2);
 }
 
 .proof-icon {
@@ -415,6 +489,12 @@ body {
 .tx-hash {
   font-size: 11px;
   color: var(--text2);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.tx-hash:hover {
+  color: var(--primary);
 }
 
 /* ========== DASHBOARD VIEW (Gamification) ========== */

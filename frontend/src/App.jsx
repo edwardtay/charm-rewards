@@ -95,6 +95,12 @@ function App() {
 
   const fireConfetti = () => {
     setConfetti(true)
+    // Play success sound
+    try {
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleVlHgLPm6JNjR0Zhn+z4yX1cWmGTxe/9qXRnZnqZv+vumXRndoKMr+LvmHlpZHKFmrzq65R2bWt/iZiy5++WdG1ofY+fqN/skHRrbXyPlZzX6px4bm94h4+Yzt2ddW1scXmLk5DI1Jx1bm1yd4iRi8HMmXVtbXF2hY+IusSWdGxsbHF7h4euwJR0bGxrc3l/gov4')
+      audio.volume = 0.3
+      audio.play().catch(() => { })
+    } catch { }
     setTimeout(() => setConfetti(false), 1500)
   }
 
@@ -307,14 +313,14 @@ outs:
                 <pre className="code-block">{generateSpell('mint', 100)}</pre>
               )}
               {techTab === 'proof' && (
-                <div className="proof-pipeline">
-                  <div className="proof-step"><span className="proof-icon">📝</span><span>Spell</span></div>
-                  <span className="proof-arrow">→</span>
-                  <div className="proof-step"><span className="proof-icon">⚙️</span><span>Contract</span></div>
-                  <span className="proof-arrow">→</span>
-                  <div className="proof-step"><span className="proof-icon">🔐</span><span>zkVM</span></div>
-                  <span className="proof-arrow">→</span>
-                  <div className="proof-step"><span className="proof-icon">₿</span><span>Bitcoin</span></div>
+                <div className="proof-pipeline animated">
+                  <div className="proof-step step-1"><span className="proof-icon">📝</span><span>Spell</span><small>YAML config</small></div>
+                  <span className="proof-arrow anim-1">→</span>
+                  <div className="proof-step step-2"><span className="proof-icon">⚙️</span><span>Contract</span><small>Rust logic</small></div>
+                  <span className="proof-arrow anim-2">→</span>
+                  <div className="proof-step step-3"><span className="proof-icon">🔐</span><span>zkVM</span><small>SP1 prover</small></div>
+                  <span className="proof-arrow anim-3">→</span>
+                  <div className="proof-step step-4"><span className="proof-icon">₿</span><span>Bitcoin</span><small>On-chain</small></div>
                 </div>
               )}
             </div>
@@ -346,7 +352,9 @@ outs:
                     <span className="tx-desc">{tx.desc}</span>
                     <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
                     <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
-                    <code className="tx-hash">{tx.id.slice(0, 8)}...</code>
+                    <a href={`https://mempool.space/testnet/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
+                      {tx.id.slice(0, 8)}... 🔗
+                    </a>
                   </div>
                 ))}
               </div>
