@@ -88,32 +88,37 @@ body::after {
 }
 
 /* Header */
-.header {
+.navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
+  padding: 12px 24px;
+  /* Compact padding */
   border-bottom: 1px solid var(--border);
-  background: rgba(18, 18, 24, 0.6);
+  background: rgba(5, 5, 7, 0.8);
+  /* Darker, more solid for contrast */
   backdrop-filter: var(--glass);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.logo {
+.nav-brand {
   font-size: 18px;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  /* Tighter gap */
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
 }
 
-.logo-img {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  object-fit: cover;
+.brand-icon {
+  font-size: 20px;
+  filter: drop-shadow(0 0 8px rgba(46, 196, 182, 0.3));
+  /* Subtle glow */
 }
 
 .nav {
