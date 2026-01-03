@@ -541,7 +541,7 @@ outs:
                       <span className="tx-desc">{tx.desc}</span>
                       <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
                       <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
-                      <a href={`https://mempool.space/testnet/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
+                      <a href={`https://mempool.space/testnet4/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
                         {tx.id.slice(0, 8)}... 🔗
                       </a>
                     </div>
