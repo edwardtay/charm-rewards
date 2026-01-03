@@ -1212,17 +1212,31 @@ body::after {
 
 .network-field {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.network-field label {
+  display: block;
+  width: 100%;
+  margin-bottom: 2px;
+  font-weight: 600;
+  color: var(--text2);
 }
 
 .network-field code {
+  display: block;
   background: var(--surface2);
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
   color: var(--primary);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
+  width: 100%;
+  word-break: break-all;
+  user-select: all;
+  border: 1px solid rgba(255, 159, 28, 0.1);
 }
 
 .network-help {
