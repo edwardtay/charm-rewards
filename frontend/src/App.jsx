@@ -197,6 +197,19 @@ function App() {
   }
 
   const handleMint = async (amount) => {
+    // 1. Simulation Override (Dev Mode)
+    if (devMode) {
+      notify('Dev Mode: Simulating Mint...', 'info')
+      setTimeout(() => {
+        setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
+        addTx('mint', amount, `Mint ${amount} REWA (Dev)`, { to: state.address })
+        notify(`+${amount} REWA (Simulated)`)
+        fireConfetti()
+      }, 800)
+      return
+    }
+
+    // 2. Real Transaction
     if (!wallet.connected) return setShowWalletModal(true)
 
     try {
@@ -246,6 +259,20 @@ function App() {
   }
 
   const handleBurn = async (reward) => {
+    // 1. Simulation Override (Dev Mode)
+    if (devMode) {
+      if (state.balance < reward.cost) return notify('Insufficient balance (Sim)', 'error')
+      notify(`Dev Mode: Simulating Burn...`, 'info')
+      setTimeout(() => {
+        setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
+        addTx('burn', -reward.cost, reward.name, { rewardId: reward.id })
+        notify(`Redeemed: ${reward.name} (Simulated)`)
+        fireConfetti()
+      }, 800)
+      return
+    }
+
+    // 2. Real Transaction
     if (!wallet.connected) return setShowWalletModal(true)
     if (state.balance < reward.cost) return notify('Insufficient balance', 'error')
 
