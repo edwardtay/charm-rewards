@@ -278,6 +278,15 @@ function App() {
 
     // Real Burn: Send sats to a "burn" (return to self for now to save user funds on testnet)
     try {
+      if (wallet.type === 'unisat' && window.unisat) {
+        const txid = await window.unisat.sendBitcoin(wallet.address, Math.max(1, reward.cost))
+        setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
+        addTx('burn', -reward.cost, reward.name, { rewardId: reward.id, id: txid })
+        notify(`Redeemed: ${reward.name}`)
+        fireConfetti()
+        return
+      }
+
       await sendBtcTransaction({
         payload: {
           network: { type: BitcoinNetworkType.Testnet },
