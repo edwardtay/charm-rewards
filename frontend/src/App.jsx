@@ -99,15 +99,46 @@ function App() {
     if (devMode) addLog(`State updated: Balance=${state.balance} Streak=${state.streak}`)
   }, [state, devMode])
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) }, [state])
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  }, [state])
+
+  // Real Transaction Polling
   useEffect(() => {
     const pending = state.txs.filter(t => t.status === 'pending')
-    if (pending.length) {
-      const timer = setTimeout(() => {
-        setState(s => ({ ...s, txs: s.txs.map(t => t.status === 'pending' ? { ...t, status: 'confirmed' } : t) }))
-      }, 2000)
-      return () => clearTimeout(timer)
+    if (pending.length === 0) return
+
+    const checkStatus = async () => {
+      let updated = false
+      const newTxs = await Promise.all(state.txs.map(async (tx) => {
+        if (tx.status !== 'pending') return tx
+
+        try {
+          // If it's a legacy random ID (not 64 chars hex), just auto-confirm to clean up
+          if (tx.id.length !== 64) return { ...tx, status: 'confirmed' }
+
+          const res = await fetch(`https://mempool.space/testnet4/api/tx/${tx.id}/status`)
+          if (!res.ok) return tx
+          const data = await res.json()
+
+          if (data.confirmed) {
+            updated = true
+            notify(`Transaction Confirmed!`, 'success')
+            return { ...tx, status: 'confirmed' }
+          }
+        } catch (e) {
+          console.error('Failed to check tx:', tx.id)
+        }
+        return tx
+      }))
+
+      if (updated) {
+        setState(s => ({ ...s, txs: newTxs }))
+      }
     }
+
+    const timer = setInterval(checkStatus, 5000) // Check every 5s
+    return () => clearInterval(timer)
   }, [state.txs])
 
   const notify = (msg, type = 'success') => {
@@ -197,7 +228,7 @@ function App() {
     setState(s => ({
       ...s,
       txs: [{
-        id: genHash(),
+        id: extra.id || genHash(),
         type,
         amount,
         desc,
