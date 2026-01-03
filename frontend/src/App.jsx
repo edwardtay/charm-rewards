@@ -389,31 +389,13 @@ outs:
                       📋 Copy Address
                     </button>
                     <a
-                      href="https://bitcoinfaucet.uo1.net"
+                      href="https://mempool.space/testnet4/faucet"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="menu-item"
                       onClick={() => setShowWalletMenu(false)}
                     >
-                      🚰 Faucet 1 (uo1.net)
-                    </a>
-                    <a
-                      href="https://testnet-faucet.mempool.co"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="menu-item"
-                      onClick={() => setShowWalletMenu(false)}
-                    >
-                      🚰 Faucet 2 (Mempool)
-                    </a>
-                    <a
-                      href="https://tbtc.bitaps.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="menu-item"
-                      onClick={() => setShowWalletMenu(false)}
-                    >
-                      🚰 Faucet 3 (Bitaps)
+                      🚰 Faucet (Mempool)
                     </a>
                     <button onClick={disconnectWallet} className="menu-item danger">
                       🔌 Disconnect
