@@ -84,6 +84,7 @@ function App() {
   const [devMode, setDevMode] = useState(false)
   const [logs, setLogs] = useState([])
   const [blockHeight, setBlockHeight] = useState(0)
+  const [page, setPage] = useState(0)
 
   const addLog = (msg) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 50))
 
@@ -268,8 +269,10 @@ function App() {
         }
         return true
       } catch (e) {
-        notify('⚠️ Please switch wallet to Testnet4 manually', 'error')
-        return false
+        // Soft fail: Warn but allow proceed, as wallet might be correct but API failed
+        console.warn(e)
+        notify('⚠️ Ensure UniSat is on Testnet4', 'info')
+        return true
       }
     }
 
@@ -542,18 +545,28 @@ outs:
               <section className="tx-section">
                 <h2>📜 Recent Transactions</h2>
                 <div className="tx-list">
-                  {state.txs.filter(tx => !tx.desc.includes('(Dev)') && !tx.desc.includes('(Sim)')).slice(0, 5).map(tx => (
-                    <div key={tx.id} className="tx-row">
-                      <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
-                      <span className="tx-desc">{tx.desc}</span>
-                      <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
-                      <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
-                      <a href={`https://mempool.space/testnet4/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
-                        {tx.id.slice(0, 8)}... 🔗
-                      </a>
-                    </div>
-                  ))}
+                  {state.txs
+                    .filter(tx => !tx.desc.includes('(Dev)') && !tx.desc.includes('(Sim)'))
+                    .slice(page * 5, (page + 1) * 5)
+                    .map(tx => (
+                      <div key={tx.id} className="tx-row">
+                        <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
+                        <span className="tx-desc">{tx.desc}</span>
+                        <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
+                        <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
+                        <a href={`https://mempool.space/testnet4/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
+                          {tx.id.slice(0, 8)}... 🔗
+                        </a>
+                      </div>
+                    ))}
                 </div>
+                {state.txs.filter(tx => !tx.desc.includes('(Dev)') && !tx.desc.includes('(Sim)')).length > 5 && (
+                  <div className="pagination">
+                    <button className="btn-sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>← Newer</button>
+                    <span className="page-num">Page {page + 1}</span>
+                    <button className="btn-sm" disabled={(page + 1) * 5 >= state.txs.filter(tx => !tx.desc.includes('(Dev)') && !tx.desc.includes('(Sim)')).length} onClick={() => setPage(p => p + 1)}>Older →</button>
+                  </div>
+                )}
               </section>
             )
           }

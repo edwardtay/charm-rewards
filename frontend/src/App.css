@@ -1392,3 +1392,18 @@ body::after {
   margin-right: 8px;
   opacity: 0.5;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.page-num {
+  font-size: 13px;
+  color: var(--text2);
+}
