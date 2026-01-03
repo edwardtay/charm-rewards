@@ -114,6 +114,19 @@ function App() {
     setTimeout(() => setConfetti(false), 1500)
   }
 
+  // Wallet Helper Functions
+  const copyAddress = () => {
+    navigator.clipboard.writeText(wallet.address)
+    notify('Address copied to clipboard!')
+    setShowWalletMenu(false)
+  }
+
+  const disconnectWallet = () => {
+    setWallet({ connected: false, type: null, address: null })
+    setShowWalletMenu(false)
+    notify('Wallet disconnected')
+  }
+
   // Wallet detection and connection
   const detectWallets = () => [
     { id: 'xverse', name: 'Xverse', logo: '/wallets/xverse.svg', desc: 'Recommended for BOS', available: true },
