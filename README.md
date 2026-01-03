@@ -32,7 +32,51 @@ graph LR
 1.  **Spell (Action)**: User intents (Mint, Burn, Transfer) are serialized into a "Spell" (a compact state transition request).
 2.  **ZK-Prover (Off-chain)**: The **Charms SDK** executes the Rust smart contract logic in a zkVM (SP1/Risc0). This generates a ZK proof attesting that the state transition follows the rules (e.g., "Sender has balance", "Supply < Max").
 3.  **Verification (On-chain)**: The proof is batched and verified by the BitcoinOS BitSNARK verifier on Bitcoin L1.
-4.  **Settlement**: If verified, the Bitcoin UTXO set is updated.
+4.  **Settlement**: If verified, the Bitcoin UTXO set is updated via the BitSNARK operator.
+
+## ⚙️ Protocol Specification
+
+OPUS implements a **Finite State Machine** model on top of Bitcoin's UXTO set. Each transition must satisfy the `measure` invariant (Conservation of Mass) defined in the Rust contract.
+
+### The Spell (State Transition)
+Transactions are defined as "Spells" in YAML format (Standard V8):
+
+```yaml
+version: 8
+apps:
+  $0: t/OPUS_APP_ID/d8a7... # App Identifier
+ins:
+  - utxo_id: 3f9a... # Input UTXO
+    charms:
+      $0: 1000 # Consuming 1000 OPUS
+outs:
+  - address: bc1p... # Recipient
+    charms:
+      $0: 400  # Receiving 400 OPUS
+  - address: bc1q... # Change
+    charms:
+      $0: 600  # 600 OPUS Change
+# Invariant: Sum(Ins) == Sum(Outs)
+```
+
+### Verification Logic (Rust)
+The `charms-sdk` compiles the following logic into a RISC-V binary for ZK proving:
+
+```rust
+#[app_contract]
+fn main(action: Action) {
+    match action {
+        Action::Mint(amt) => {
+            assert!(ctx.sender == ADMIN_KEY, "Only admin can mint");
+            ctx.mint(amt);
+        },
+        Action::Burn(amt) => {
+             // Proof of burn logic
+             ctx.burn(amt);
+        }
+    }
+}
+```
 
 ## 🚀 Live Demo (Testnet4)
 
@@ -57,6 +101,20 @@ The application is deployed on Bitcoin Testnet4.
 - **Frontend**: React, Vite, Framer Motion
 - **Wallets**: Sats Connect (Xverse), Unisat API
 - **Design**: Glassmorphism UI, CSS Modules
+
+## 👨‍💻 Running Locally
+
+To verify the build and run the frontend interface:
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# > Frontend running on http://localhost:5173
+```
+*Note: The frontend connects to Bitcoin Testnet4 via UniSat/Xverse. Only read-operations work without a wallet connection.*
 
 ---
 
