@@ -130,6 +130,7 @@ function App() {
           payload: {
             purposes: [AddressPurpose.Payment, AddressPurpose.Ordinals],
             message: 'CharmRewards - Bitcoin Loyalty Tokens',
+            network: { type: BitcoinNetworkType.Testnet },
           },
           onFinish: (response) => {
             const paymentAddr = response.addresses.find(a => a.purpose === AddressPurpose.Payment)
