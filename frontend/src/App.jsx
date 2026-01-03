@@ -383,7 +383,7 @@ outs:
         </div>
         <nav className="nav">
           <button className={`nav-btn ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>Protocol</button>
-          <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}>Dashboard</button>
+          <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}>Rewards</button>
         </nav>
         <div className="header-actions">
           {wallet.connected ? (
@@ -455,10 +455,6 @@ outs:
                 The first loyalty token that lives natively in your Bitcoin wallet.
               </p>
               <div className="hero-stats">
-                <div className="hero-stat">
-                  <span className="hero-value">{state.balance.toLocaleString()}</span>
-                  <span className="hero-label">OPUS Balance</span>
-                </div>
                 <div className="hero-stat">
                   <span className="hero-value">{state.txs.length}</span>
                   <span className="hero-label">Transactions</span>
@@ -574,6 +570,10 @@ outs:
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
+            {/* Simulation Banner */}
+            <div className="simulation-banner">
+              ⚠️ <b>Simulation Demo</b> — Real World Adoption Coming Soon
+            </div>
             {/* Stats Bar */}
             <div className="dash-stats">
               <div className="dash-stat main">

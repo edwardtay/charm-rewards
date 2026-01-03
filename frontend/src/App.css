@@ -196,9 +196,11 @@ body::after {
 /* ========== HOME VIEW (Technical) ========== */
 .main-home {
   flex: 1;
-  max-width: 1000px;
+  max-width: 900px;
+  /* Tighter width */
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 32px 20px;
+  width: 100%;
 }
 
 /* Hero */
