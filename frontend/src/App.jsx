@@ -203,18 +203,6 @@ function App() {
   }
 
   const handleMint = async (amount) => {
-    // 1. Simulation Override (Dev Mode)
-    if (devMode) {
-      notify('Dev Mode: Simulating Mint...', 'info')
-      setTimeout(() => {
-        setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-        addTx('mint', amount, `Mint ${amount} OPUS (Dev)`, { to: state.address })
-        notify(`+${amount} OPUS (Simulated)`)
-        fireConfetti()
-      }, 800)
-      return
-    }
-
     // 2. Real Transaction
     if (!wallet.connected) return setShowWalletModal(true)
 
@@ -267,19 +255,6 @@ function App() {
   }
 
   const handleBurn = async (reward) => {
-    // 1. Simulation Override (Dev Mode)
-    if (devMode) {
-      if (state.balance < reward.cost) return notify('Insufficient balance (Sim)', 'error')
-      notify(`Dev Mode: Simulating Burn...`, 'info')
-      setTimeout(() => {
-        setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
-        addTx('burn', -reward.cost, reward.name, { rewardId: reward.id })
-        notify(`Redeemed: ${reward.name} (Simulated)`)
-        fireConfetti()
-      }, 800)
-      return
-    }
-
     // 2. Real Transaction
     if (!wallet.connected) return setShowWalletModal(true)
     if (state.balance < reward.cost) return notify('Insufficient balance', 'error')
@@ -488,7 +463,7 @@ outs:
               <section className="tx-section">
                 <h2>📜 Recent Transactions</h2>
                 <div className="tx-list">
-                  {state.txs.slice(0, 5).map(tx => (
+                  {state.txs.filter(tx => !tx.desc.includes('(Dev)') && !tx.desc.includes('(Sim)')).slice(0, 5).map(tx => (
                     <div key={tx.id} className="tx-row">
                       <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
                       <span className="tx-desc">{tx.desc}</span>

@@ -1,71 +1,36 @@
-# CharmRewards ✨
+# OPUS: Onchain Programmable UTXOs
 
-> **Bitcoin-Native Loyalty Token Platform** powered by [Charms Protocol](https://charms.dev)
-
-Programmable loyalty tokens on Bitcoin. Earn, redeem, and transfer tokens — all secured by zkVM proofs on Bitcoin UTXOs.
-
-![CharmRewards Demo](./demo-screenshot.png)
+**OPUS** is a Bitcoin-native protocol demonstrating **App-Specific Rollups** on BitcoinOS.
+It enables programmable, stateful assets (Loyalty Tokens, Stablecoins, etc.) that live directly on Bitcoin L1 as UTXOs, but whose state transitions are governed by off-chain zero-knowledge proofs.
 
 ## 🏆 Hackathon Alignment
 
 **Mission: Make Bitcoin Programmable**
-CharmRewards directly addresses the mission by bringing complex loyalty logic (minting, burning, tiered rewards) to Bitcoin without sidechains or bridges.
+OPUS directly addresses the mission by bringing complex loyalty logic (minting, burning, tiered rewards) to Bitcoin without sidechains or bridges.
 
-| Criteria | Implementation in CharmRewards |
+| Criteria | Implementation in OPUS |
 | :--- | :--- |
 | **SDK First** | Built using `charms-sdk` 0.10, utilizing standard `app_contract` patterns. |
 | **Working UI** | Complete React dashboard with Xverse/Unisat wallet integration. |
 | **Core Feature** | **zkBTC Loyalty**: Tokens are real UTXOs that change state based on ZK proofs. |
 | **Innovation** | Demonstrates "Burn-to-Redeem" pattern proving ownership without revealing identity. |
 
-## 🏗 Architecture
-
-The system uses a **Prover-Verifier** model where user actions generate proofs verified by the BitcoinOS zkVM.
-
-```mermaid
-graph TD
-    User[User Action] -->|1. Sign Intent| Client[Frontend App]
-    Client -->|2. Generate Spell| SDK[Charms SDK]
-    SDK -->|3. Create zkProof| Prover[SP1 Prover]
-    Prover -->|4. Submit Proof| BOS[BitcoinOS zkVM]
-    BOS -->|5. Verify & Update| BTC[Bitcoin Network]
-    
-    subgraph "Off-Chain (Client)"
-    User
-    Client
-    SDK
-    end
-    
-    subgraph "Compute (zkVM)"
-    Prover
-    BOS
-    end
-    
-    subgraph "On-Chain (L1)"
-    BTC
-    end
-```
-
-# OPUS: Onchain Programmable UTXOs
-
-**OPUS** is a Bitcoin-native protocol demonstrating **App-Specific Rollups** on BitcoinOS.
-It enables programmable, stateful assets (Loyalty Tokens, Stablecoins, etc.) that live directly on Bitcoin L1 as UTXOs, but whose state transitions are governed by off-chain zero-knowledge proofs.
-
 ## 📐 Architecture
 
 The protocol follows the **Spell -> Proof -> Verification** pipeline:
+
+```mermaid
+graph LR
+    User[User Action] -->|Sign| App[Frontend]
+    App -->|Generate Spell| ZK[ZK Prover]
+    ZK -->|Verify Proof| BOS[BitcoinOS]
+    BOS -->|Update UTXO| BTC[Bitcoin L1]
+```
 
 1.  **Spell (Action)**: User intents (Mint, Burn, Transfer) are serialized into a "Spell" (a compact state transition request).
 2.  **ZK-Prover (Off-chain)**: The **Charms SDK** executes the Rust smart contract logic in a zkVM (SP1/Risc0). This generates a ZK proof attesting that the state transition follows the rules (e.g., "Sender has balance", "Supply < Max").
 3.  **Verification (On-chain)**: The proof is batched and verified by the BitcoinOS BitSNARK verifier on Bitcoin L1.
 4.  **Settlement**: If verified, the Bitcoin UTXO set is updated.
-
-## � Tech Stack
-
-*   **Frontend**: React + Vite + Framer Motion (Glassmorphism UI)
-*   **Protocol**: BitcoinOS (BitSNARK verification)
-*   **Contract**: Rust (Charms SDK)
-*   **Wallet**: UniSat / Xverse (BIP-322 / PSBT)
 
 ## 🚀 Live Demo (Testnet4)
 
