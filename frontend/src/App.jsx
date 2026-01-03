@@ -186,15 +186,29 @@ function App() {
   const handleMint = async (amount) => {
     if (!wallet.connected) return setShowWalletModal(true)
 
-    // Real Testnet Transaction: Send 'amount' sats to self to record on-chain
     try {
+      // UniSat Check: UniSat API is different from sats-connect
+      if (wallet.type === 'unisat' && window.unisat) {
+        try {
+          const txid = await window.unisat.sendBitcoin(wallet.address, amount)
+          setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
+          addTx('mint', amount, `Mint ${amount} REWA`, { to: state.address, id: txid })
+          notify(`+${amount} ${TOKEN.ticker} (TX Sent)`)
+          fireConfetti()
+        } catch (e) {
+          throw e
+        }
+        return
+      }
+
+      // Xverse / Sats Connect
       await sendBtcTransaction({
         payload: {
           network: { type: BitcoinNetworkType.Testnet },
           recipients: [
             {
               address: wallet.address,
-              amountSats: BigInt(amount), // Mint amount = Sats amount for demo
+              amountSats: BigInt(amount),
             },
           ],
           senderAddress: wallet.address,
@@ -209,11 +223,16 @@ function App() {
       })
     } catch (e) {
       console.error(e)
-      // Fallback for simulation if real TX fails (e.g. insufficient funds) or user wants quick demo
-      notify('Transaction failed. Using simulation mode.', 'warning')
-      setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-      addTx('mint', amount, `Mint ${amount} REWA (Sim)`, { to: state.address })
-      fireConfetti()
+      // Fallback for simulation
+      const isUserReject = e.message?.includes('User rejected') || e.code === 4001
+      if (!isUserReject) {
+        notify('Network error. Using simulation mode.', 'warning')
+        setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
+        addTx('mint', amount, `Mint ${amount} REWA (Sim)`, { to: state.address })
+        fireConfetti()
+      } else {
+        notify('Transaction rejected', 'error')
+      }
     }
   }
 
