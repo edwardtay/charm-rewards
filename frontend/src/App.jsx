@@ -461,6 +461,43 @@ outs:
             </motion.div>
           </div>
 
+          {/* Demo Actions */}
+          <section className="demo-section">
+            <h2>⚡ Try It</h2>
+            <div className="demo-actions">
+              <button className="demo-btn mint" onClick={() => handleMint(600)}>
+                <span>Mint 600 OPUS</span>
+                <small>Creates enchanted UTXO</small>
+              </button>
+              <button className="demo-btn burn" onClick={() => handleBurn(REWARDS[0])} disabled={state.balance < 200}>
+                <span>Burn for 10% Off</span>
+                <small>Destroys tokens for reward</small>
+              </button>
+            </div>
+          </section>
+
+          {/* Transaction History */}
+          {
+            state.txs.length > 0 && (
+              <section className="tx-section">
+                <h2>📜 Recent Transactions</h2>
+                <div className="tx-list">
+                  {state.txs.slice(0, 5).map(tx => (
+                    <div key={tx.id} className="tx-row">
+                      <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
+                      <span className="tx-desc">{tx.desc}</span>
+                      <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
+                      <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
+                      <a href={`https://mempool.space/testnet/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
+                        {tx.id.slice(0, 8)}... 🔗
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          }
+
           {/* Features Grid */}
           <section className="features">
             <div className="feature">
@@ -513,43 +550,6 @@ outs:
               )}
             </div>
           </section>
-
-          {/* Demo Actions */}
-          <section className="demo-section">
-            <h2>⚡ Try It</h2>
-            <div className="demo-actions">
-              <button className="demo-btn mint" onClick={() => handleMint(600)}>
-                <span>Mint 600 OPUS</span>
-                <small>Creates enchanted UTXO</small>
-              </button>
-              <button className="demo-btn burn" onClick={() => handleBurn(REWARDS[0])} disabled={state.balance < 200}>
-                <span>Burn for 10% Off</span>
-                <small>Destroys tokens for reward</small>
-              </button>
-            </div>
-          </section>
-
-          {/* Transaction History */}
-          {
-            state.txs.length > 0 && (
-              <section className="tx-section">
-                <h2>📜 Recent Transactions</h2>
-                <div className="tx-list">
-                  {state.txs.slice(0, 5).map(tx => (
-                    <div key={tx.id} className="tx-row">
-                      <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
-                      <span className="tx-desc">{tx.desc}</span>
-                      <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
-                      <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
-                      <a href={`https://mempool.space/testnet/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
-                        {tx.id.slice(0, 8)}... 🔗
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )
-          }
         </motion.main >
       )
       }
