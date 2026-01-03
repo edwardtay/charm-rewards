@@ -77,6 +77,7 @@ function App() {
   const [confetti, setConfetti] = useState(false)
   const [showSpin, setShowSpin] = useState(false)
   const [spinResult, setSpinResult] = useState(null)
+  const [showWalletMenu, setShowWalletMenu] = useState(false) // New state for menu
   const [devMode, setDevMode] = useState(false)
   const [logs, setLogs] = useState([])
 
@@ -262,10 +263,33 @@ outs:
         </nav>
         <div className="header-actions">
           {wallet.connected ? (
-            <button className="wallet-btn connected" onClick={() => setWallet({ connected: false, type: null, address: null })}>
-              <span className="wallet-indicator"></span>
-              {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
-            </button>
+            <div className="wallet-container" style={{ position: 'relative' }}>
+              <button
+                className="wallet-btn connected"
+                onClick={() => setShowWalletMenu(!showWalletMenu)}
+              >
+                <span className="wallet-indicator"></span>
+                {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+              </button>
+
+              <AnimatePresence>
+                {showWalletMenu && (
+                  <motion.div
+                    className="wallet-menu"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                  >
+                    <button onClick={copyAddress} className="menu-item">
+                      📋 Copy Address
+                    </button>
+                    <button onClick={disconnectWallet} className="menu-item danger">
+                      🔌 Disconnect
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <button className="wallet-btn" onClick={() => setShowWalletModal(true)}>Connect Wallet</button>
           )}
