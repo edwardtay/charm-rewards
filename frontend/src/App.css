@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Premium Dark Palette */
+  /* Premium Dark Palette v2 */
   --bg: #050507;
   --bg-gradient: radial-gradient(circle at 50% 0%, #1a1a24 0%, #050507 100%);
   --surface: rgba(255, 255, 255, 0.03);

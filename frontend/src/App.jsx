@@ -124,19 +124,19 @@ function App() {
   const connectWallet = async (walletId) => {
     try {
       if (walletId === 'xverse') {
-        // Xverse currently requires manual switch, but we request the specific network
+        // Xverse: We request the address without enforcing network in the payload
+        // This avoids the 'Mismatched Network' blocker, allowing the user to switch manually
         await getAddress({
           payload: {
             purposes: [AddressPurpose.Payment, AddressPurpose.Ordinals],
             message: 'CharmRewards - Bitcoin Loyalty Tokens',
-            network: { type: BitcoinNetworkType.Testnet },
           },
           onFinish: (response) => {
             const paymentAddr = response.addresses.find(a => a.purpose === AddressPurpose.Payment)
             if (paymentAddr) {
               setWallet({ connected: true, type: 'xverse', address: paymentAddr.address })
               setState(s => ({ ...s, address: paymentAddr.address }))
-              notify('✅ Wallet connected!')
+              notify('✅ Wallet connected! Ensure you are on Testnet.')
               setShowWalletModal(false)
             }
           },
@@ -571,7 +571,10 @@ outs:
                     <code>https://mempool.space/testnet</code>
                   </div>
                 </div>
-                <p className="network-help">If using UniSat, add a custom network with these details if auto-switch fails.</p>
+                <p className="network-help">
+                  <strong>Xverse:</strong> Switch to Testnet in wallet settings manually.<br />
+                  <strong>UniSat:</strong> Use "Add Custom Network" with above details.
+                </p>
               </div>
             </div>
           </div>
