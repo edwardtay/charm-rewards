@@ -7,13 +7,13 @@ const STORAGE_KEY = 'charmrewards_v5'
 const genHash = () => [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 const genAddr = () => 'tb1p' + [...Array(58)].map(() => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')
 
-const TOKEN = { ticker: 'REWA', maxSupply: 1000000, appId: 'charmrewards' }
+const TOKEN = { ticker: 'OPUS', name: 'Onchain Programmable UTXOs', maxSupply: 1000000, appId: 'charmrewards' }
 
 const REWARDS = [
-  { id: 'r1', name: '10% Off', cost: 200, icon: '🏷️' },
-  { id: 'r2', name: 'Free Shipping', cost: 300, icon: '📦' },
-  { id: 'r3', name: '$5 Credit', cost: 500, icon: '💵' },
-  { id: 'r4', name: 'NFT Badge', cost: 1000, icon: '🎖️' },
+  { id: 'r1', name: '10% Off', cost: 600, icon: '🏷️' },
+  { id: 'r2', name: 'Free Shipping', cost: 800, icon: '📦' },
+  { id: 'r3', name: '$5 Credit', cost: 1200, icon: '💵' },
+  { id: 'r4', name: 'NFT Badge', cost: 2000, icon: '🎖️' },
 ]
 
 const ACHIEVEMENTS = [
@@ -432,25 +432,34 @@ outs:
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Hero */}
-          <section className="hero">
-            <h1>Bitcoin-Native Loyalty Tokens</h1>
-            <p className="subtitle">Programmable rewards on Bitcoin using Charms Protocol + BOS zkVM</p>
-            <div className="hero-stats">
-              <div className="hero-stat">
-                <span className="hero-value">{state.balance.toLocaleString()}</span>
-                <span className="hero-label">REWA Balance</span>
+          <div className="hero-section">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="hero-content"
+            >
+              <h1>Next Gen Loyalty <span className="text-gradient">on Bitcoin</span></h1>
+              <p className="hero-subtitle">
+                Meet <b>OPUS</b> (Onchain Programmable UTXOs). <br />
+                The first loyalty token that lives natively in your Bitcoin wallet.
+              </p>
+              <div className="hero-stats">
+                <div className="hero-stat">
+                  <span className="hero-value">{state.balance.toLocaleString()}</span>
+                  <span className="hero-label">OPUS Balance</span>
+                </div>
+                <div className="hero-stat">
+                  <span className="hero-value">{state.txs.length}</span>
+                  <span className="hero-label">Transactions</span>
+                </div>
+                <div className="hero-stat">
+                  <span className="hero-value">1M</span>
+                  <span className="hero-label">Max Supply</span>
+                </div>
               </div>
-              <div className="hero-stat">
-                <span className="hero-value">{state.txs.length}</span>
-                <span className="hero-label">Transactions</span>
-              </div>
-              <div className="hero-stat">
-                <span className="hero-value">1M</span>
-                <span className="hero-label">Max Supply</span>
-              </div>
-            </div>
-          </section>
+            </motion.div>
+          </div>
 
           {/* Features Grid */}
           <section className="features">
@@ -510,7 +519,7 @@ outs:
             <h2>⚡ Try It</h2>
             <div className="demo-actions">
               <button className="demo-btn mint" onClick={() => handleMint(600)}>
-                <span>Mint 600 REWA</span>
+                <span>Mint 600 OPUS</span>
                 <small>Creates enchanted UTXO</small>
               </button>
               <button className="demo-btn burn" onClick={() => handleBurn(REWARDS[0])} disabled={state.balance < 200}>
@@ -521,165 +530,170 @@ outs:
           </section>
 
           {/* Transaction History */}
-          {state.txs.length > 0 && (
-            <section className="tx-section">
-              <h2>📜 Recent Transactions</h2>
-              <div className="tx-list">
-                {state.txs.slice(0, 5).map(tx => (
-                  <div key={tx.id} className="tx-row">
-                    <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
-                    <span className="tx-desc">{tx.desc}</span>
-                    <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
-                    <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
-                    <a href={`https://mempool.space/testnet/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
-                      {tx.id.slice(0, 8)}... 🔗
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </motion.main>
-      )}
+          {
+            state.txs.length > 0 && (
+              <section className="tx-section">
+                <h2>📜 Recent Transactions</h2>
+                <div className="tx-list">
+                  {state.txs.slice(0, 5).map(tx => (
+                    <div key={tx.id} className="tx-row">
+                      <span className={`tx-icon ${tx.type}`}>{tx.type === 'mint' ? '↑' : '↓'}</span>
+                      <span className="tx-desc">{tx.desc}</span>
+                      <span className={`tx-amt ${tx.amount > 0 ? 'pos' : 'neg'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</span>
+                      <span className={`tx-status ${tx.status}`}>{tx.status === 'confirmed' ? '✓' : '⏳'}</span>
+                      <a href={`https://mempool.space/testnet/tx/${tx.id}`} target="_blank" rel="noopener" className="tx-hash" title="View on mempool.space">
+                        {tx.id.slice(0, 8)}... 🔗
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          }
+        </motion.main >
+      )
+      }
 
       {/* DASHBOARD VIEW - Gamification */}
-      {view === 'dashboard' && (
-        <motion.main
-          className="main-dashboard"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {/* Stats Bar */}
-          <div className="dash-stats">
-            <div className="dash-stat main">
-              <span className="dash-value">{state.balance.toLocaleString()}</span>
-              <span className="dash-label">
-                REWA Points <span title="Off-chain App Points. Mint to convert to on-chain tokens." style={{ cursor: 'help', fontSize: '0.8em', opacity: 0.7 }}>ℹ️</span>
-              </span>
+      {
+        view === 'dashboard' && (
+          <motion.main
+            className="main-dashboard"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Stats Bar */}
+            <div className="dash-stats">
+              <div className="dash-stat main">
+                <span className="dash-value">{state.balance.toLocaleString()}</span>
+                <span className="dash-label">
+                  OPUS Points <span title="Off-chain App Points. Mint to convert to on-chain tokens." style={{ cursor: 'help', fontSize: '0.8em', opacity: 0.7 }}>ℹ️</span>
+                </span>
+              </div>
+              <div className="dash-stat">
+                <span className="dash-value">🔥 {state.streak}</span>
+                <span className="dash-label">Streak</span>
+              </div>
+              <div className="dash-stat">
+                <span className="dash-value">#{myLeaderPos}</span>
+                <span className="dash-label">Rank</span>
+              </div>
             </div>
-            <div className="dash-stat">
-              <span className="dash-value">🔥 {state.streak}</span>
-              <span className="dash-label">Streak</span>
+
+            <div className="dash-grid">
+              {/* Earn Section - Realistic Actions */}
+              <section className="dash-card">
+                <h3>⚡ How to Earn REWA</h3>
+                <div className="earn-actions">
+                  <div className={`earn-action ${wallet.connected ? 'completed' : ''}`}>
+                    <div className="earn-action-info">
+                      <span className="earn-action-icon">🔗</span>
+                      <div>
+                        <div className="earn-action-title">Connect Wallet</div>
+                        <div className="earn-action-desc">Link your Bitcoin wallet</div>
+                      </div>
+                    </div>
+                    <div className="earn-action-reward">
+                      {wallet.connected ? <span className="completed-badge">✓ Done</span> : <span className="earn-tokens">+500</span>}
+                    </div>
+                  </div>
+
+                  <div className={`earn-action ${state.lastDaily === new Date().toDateString() ? 'completed' : ''}`} onClick={handleDailyCheckin}>
+                    <div className="earn-action-info">
+                      <span className="earn-action-icon">📅</span>
+                      <div>
+                        <div className="earn-action-title">Daily Check-in</div>
+                        <div className="earn-action-desc">Visit once per day ({state.streak}🔥 streak)</div>
+                      </div>
+                    </div>
+                    <div className="earn-action-reward">
+                      {state.lastDaily === new Date().toDateString() ? <span className="completed-badge">✓ Claimed</span> : <span className="earn-tokens">+{Math.min(25 + state.streak * 25, 175)}</span>}
+                    </div>
+                  </div>
+
+                  <div className="earn-action disabled">
+                    <div className="earn-action-info">
+                      <span className="earn-action-icon">🛒</span>
+                      <div>
+                        <div className="earn-action-title">Make a Purchase</div>
+                        <div className="earn-action-desc">1 REWA per $1 spent</div>
+                      </div>
+                    </div>
+                    <div className="earn-action-reward">
+                      <span className="earn-tokens">+1/$ </span>
+                    </div>
+                  </div>
+
+                  <div className="earn-action disabled">
+                    <div className="earn-action-info">
+                      <span className="earn-action-icon">👥</span>
+                      <div>
+                        <div className="earn-action-title">Refer a Friend</div>
+                        <div className="earn-action-desc">Share your referral code</div>
+                      </div>
+                    </div>
+                    <div className="earn-action-reward">
+                      <span className="earn-tokens">+200</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="earn-note">💡 Tokens are minted on Bitcoin when actions are verified</p>
+              </section>
+
+              {/* Redeem Section */}
+              <section className="dash-card">
+                <h3>🎁 Redeem Rewards</h3>
+                <div className="rewards-list">
+                  {REWARDS.map(r => (
+                    <div key={r.id} className={`reward-row ${state.balance < r.cost ? 'locked' : ''}`}>
+                      <span>{r.icon}</span>
+                      <span className="reward-name">{r.name}</span>
+                      <span className="reward-cost">{r.cost}</span>
+                      <button className="btn-sm" onClick={() => handleBurn(r)} disabled={state.balance < r.cost}>
+                        {state.balance >= r.cost ? 'Get' : `+${r.cost - state.balance}`}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Achievements */}
+              <section className="dash-card">
+                <h3>🎖️ Achievements ({unlockedAch.length}/{ACHIEVEMENTS.length})</h3>
+                <div className="ach-grid">
+                  {ACHIEVEMENTS.map(a => (
+                    <div key={a.id} className={`ach-item ${a.check(state) ? 'unlocked' : ''}`}>
+                      <span className="ach-icon">{a.icon}</span>
+                      <span className="ach-name">{a.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Leaderboard */}
+              <section className="dash-card">
+                <h3>🏆 Leaderboard</h3>
+                <div className="leader-list">
+                  {LEADERBOARD.map(l => (
+                    <div key={l.rank} className="leader-row">
+                      <span className="leader-rank">#{l.rank}</span>
+                      <span className="leader-name">{l.name}</span>
+                      <span className="leader-score">{l.earned.toLocaleString()}</span>
+                    </div>
+                  ))}
+                  <div className="leader-row you">
+                    <span className="leader-rank">#{myLeaderPos}</span>
+                    <span className="leader-name">You</span>
+                    <span className="leader-score">{state.totalEarned.toLocaleString()}</span>
+                  </div>
+                </div>
+              </section>
             </div>
-            <div className="dash-stat">
-              <span className="dash-value">#{myLeaderPos}</span>
-              <span className="dash-label">Rank</span>
-            </div>
-          </div>
-
-          <div className="dash-grid">
-            {/* Earn Section - Realistic Actions */}
-            <section className="dash-card">
-              <h3>⚡ How to Earn REWA</h3>
-              <div className="earn-actions">
-                <div className={`earn-action ${wallet.connected ? 'completed' : ''}`}>
-                  <div className="earn-action-info">
-                    <span className="earn-action-icon">🔗</span>
-                    <div>
-                      <div className="earn-action-title">Connect Wallet</div>
-                      <div className="earn-action-desc">Link your Bitcoin wallet</div>
-                    </div>
-                  </div>
-                  <div className="earn-action-reward">
-                    {wallet.connected ? <span className="completed-badge">✓ Done</span> : <span className="earn-tokens">+500</span>}
-                  </div>
-                </div>
-
-                <div className={`earn-action ${state.lastDaily === new Date().toDateString() ? 'completed' : ''}`} onClick={handleDailyCheckin}>
-                  <div className="earn-action-info">
-                    <span className="earn-action-icon">📅</span>
-                    <div>
-                      <div className="earn-action-title">Daily Check-in</div>
-                      <div className="earn-action-desc">Visit once per day ({state.streak}🔥 streak)</div>
-                    </div>
-                  </div>
-                  <div className="earn-action-reward">
-                    {state.lastDaily === new Date().toDateString() ? <span className="completed-badge">✓ Claimed</span> : <span className="earn-tokens">+{Math.min(25 + state.streak * 25, 175)}</span>}
-                  </div>
-                </div>
-
-                <div className="earn-action disabled">
-                  <div className="earn-action-info">
-                    <span className="earn-action-icon">🛒</span>
-                    <div>
-                      <div className="earn-action-title">Make a Purchase</div>
-                      <div className="earn-action-desc">1 REWA per $1 spent</div>
-                    </div>
-                  </div>
-                  <div className="earn-action-reward">
-                    <span className="earn-tokens">+1/$ </span>
-                  </div>
-                </div>
-
-                <div className="earn-action disabled">
-                  <div className="earn-action-info">
-                    <span className="earn-action-icon">👥</span>
-                    <div>
-                      <div className="earn-action-title">Refer a Friend</div>
-                      <div className="earn-action-desc">Share your referral code</div>
-                    </div>
-                  </div>
-                  <div className="earn-action-reward">
-                    <span className="earn-tokens">+200</span>
-                  </div>
-                </div>
-              </div>
-              <p className="earn-note">💡 Tokens are minted on Bitcoin when actions are verified</p>
-            </section>
-
-            {/* Redeem Section */}
-            <section className="dash-card">
-              <h3>🎁 Redeem Rewards</h3>
-              <div className="rewards-list">
-                {REWARDS.map(r => (
-                  <div key={r.id} className={`reward-row ${state.balance < r.cost ? 'locked' : ''}`}>
-                    <span>{r.icon}</span>
-                    <span className="reward-name">{r.name}</span>
-                    <span className="reward-cost">{r.cost}</span>
-                    <button className="btn-sm" onClick={() => handleBurn(r)} disabled={state.balance < r.cost}>
-                      {state.balance >= r.cost ? 'Get' : `+${r.cost - state.balance}`}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Achievements */}
-            <section className="dash-card">
-              <h3>🎖️ Achievements ({unlockedAch.length}/{ACHIEVEMENTS.length})</h3>
-              <div className="ach-grid">
-                {ACHIEVEMENTS.map(a => (
-                  <div key={a.id} className={`ach-item ${a.check(state) ? 'unlocked' : ''}`}>
-                    <span className="ach-icon">{a.icon}</span>
-                    <span className="ach-name">{a.name}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Leaderboard */}
-            <section className="dash-card">
-              <h3>🏆 Leaderboard</h3>
-              <div className="leader-list">
-                {LEADERBOARD.map(l => (
-                  <div key={l.rank} className="leader-row">
-                    <span className="leader-rank">#{l.rank}</span>
-                    <span className="leader-name">{l.name}</span>
-                    <span className="leader-score">{l.earned.toLocaleString()}</span>
-                  </div>
-                ))}
-                <div className="leader-row you">
-                  <span className="leader-rank">#{myLeaderPos}</span>
-                  <span className="leader-name">You</span>
-                  <span className="leader-score">{state.totalEarned.toLocaleString()}</span>
-                </div>
-              </div>
-            </section>
-          </div>
-        </motion.main>
-      )}
+          </motion.main>
+        )
+      }
 
       {/* Footer */}
       <footer className="footer">
@@ -687,62 +701,66 @@ outs:
       </footer>
 
       {/* Wallet Modal */}
-      {showWalletModal && (
-        <div className="modal-overlay" onClick={() => setShowWalletModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">🔗 Connect to BOS <button onClick={() => setShowWalletModal(false)}>×</button></div>
-            <div className="modal-body">
-              <div className="bos-info">
-                <strong>BitcoinOS (BOS)</strong> enables programmable Bitcoin via zkSNARK proofs.
-              </div>
-              <p className="wallet-label">Select a wallet:</p>
-              {detectWallets().map(w => (
-                <button key={w.id} className={`wallet-option ${!w.available && w.id !== 'xverse' ? 'disabled' : ''}`} onClick={() => connectWallet(w.id)}>
-                  <img src={w.logo} alt={w.name} className="wallet-logo" />
-                  <div className="wallet-info">
-                    <div className="wallet-name">{w.name}</div>
-                    <div className="wallet-desc">{w.desc}</div>
-                  </div>
-                  {!w.available && w.id !== 'xverse' && <span className="wallet-badge">Not installed</span>}
-                </button>
-              ))}
-              <div className="alert-box info">
-                <p>ℹ️ <strong>Tip:</strong> Use <b>Unisat</b> for Testnet4 (compatible with Mempool faucet). Make sure to switch your wallet network to <b>Testnet4</b>.</p>
-              </div>
-              <div className="network-info">
-                <div className="network-header">
-                  <span>Network Configuration</span>
-                  <span className="network-tag">Testnet4</span>
+      {
+        showWalletModal && (
+          <div className="modal-overlay" onClick={() => setShowWalletModal(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">🔗 Connect to BOS <button onClick={() => setShowWalletModal(false)}>×</button></div>
+              <div className="modal-body">
+                <div className="bos-info">
+                  <strong>BitcoinOS (BOS)</strong> enables programmable Bitcoin via zkSNARK proofs.
                 </div>
-                <div className="network-details">
-                  <div className="network-field">
-                    <label>BTC URL</label>
-                    <code>https://mempool.space/testnet4/api</code>
-                  </div>
-                  <div className="network-field">
-                    <label>Explorer</label>
-                    <code>https://mempool.space/testnet4</code>
-                  </div>
+                <p className="wallet-label">Select a wallet:</p>
+                {detectWallets().map(w => (
+                  <button key={w.id} className={`wallet-option ${!w.available && w.id !== 'xverse' ? 'disabled' : ''}`} onClick={() => connectWallet(w.id)}>
+                    <img src={w.logo} alt={w.name} className="wallet-logo" />
+                    <div className="wallet-info">
+                      <div className="wallet-name">{w.name}</div>
+                      <div className="wallet-desc">{w.desc}</div>
+                    </div>
+                    {!w.available && w.id !== 'xverse' && <span className="wallet-badge">Not installed</span>}
+                  </button>
+                ))}
+                <div className="alert-box info">
+                  <p>ℹ️ <strong>Tip:</strong> Use <b>Unisat</b> for Testnet4 (compatible with Mempool faucet). Make sure to switch your wallet network to <b>Testnet4</b>.</p>
                 </div>
-                <p className="network-help">
-                  <strong>UniSat:</strong> Select "Bitcoin Testnet4" in settings.<br />
-                  <strong>Address Type:</strong> Native Segwit (P2WPKH).
-                </p>
+                <div className="network-info">
+                  <div className="network-header">
+                    <span>Network Configuration</span>
+                    <span className="network-tag">Testnet4</span>
+                  </div>
+                  <div className="network-details">
+                    <div className="network-field">
+                      <label>BTC URL</label>
+                      <code>https://mempool.space/testnet4/api</code>
+                    </div>
+                    <div className="network-field">
+                      <label>Explorer</label>
+                      <code>https://mempool.space/testnet4</code>
+                    </div>
+                  </div>
+                  <p className="network-help">
+                    <strong>UniSat:</strong> Select "Bitcoin Testnet4" in settings.<br />
+                    <strong>Address Type:</strong> Native Segwit (P2WPKH).
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Spin Modal */}
-      {showSpin && (
-        <div className="modal-overlay">
-          <div className="modal spin-modal">
-            <div className="spin-wheel">{spinResult ? `🎉 +${spinResult}` : '🎰'}</div>
-            {spinResult && <button className="btn-primary" onClick={() => { setShowSpin(false); setSpinResult(null) }}>Collect!</button>}
+      {
+        showSpin && (
+          <div className="modal-overlay">
+            <div className="modal spin-modal">
+              <div className="spin-wheel">{spinResult ? `🎉 +${spinResult}` : '🎰'}</div>
+              {spinResult && <button className="btn-primary" onClick={() => { setShowSpin(false); setSpinResult(null) }}>Collect!</button>}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Dev Console */}
       <AnimatePresence>
@@ -769,7 +787,7 @@ outs:
 
       {/* Toast */}
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
-    </div>
+    </div >
   )
 }
 
