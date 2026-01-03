@@ -1060,14 +1060,39 @@ body::after {
   color: var(--warning);
 }
 
-.network-info {
-  display: flex;
-  justify-content: space-between;
+
+.network-guide {
   margin-top: 16px;
-  padding: 12px;
-  background: var(--bg);
+  padding: 12px 16px;
+  background: var(--surface2);
   border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.guide-header {
+  font-size: 13px;
+  color: var(--primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step {
   font-size: 12px;
+  color: var(--text2);
+  line-height: 1.4;
+}
+
+.step strong {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .network-value {
@@ -1307,6 +1332,7 @@ body::after {
   background: rgba(239, 68, 68, 0.1);
   color: var(--error);
 }
+
 /* Wallet Menu */
 .wallet-menu {
   position: absolute;

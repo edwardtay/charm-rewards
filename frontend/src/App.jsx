@@ -717,28 +717,15 @@ outs:
                     {!w.available && w.id !== 'xverse' && <span className="wallet-badge">Not installed</span>}
                   </button>
                 ))}
-                <div className="alert-box info">
-                  <p>ℹ️ <strong>Tip:</strong> Use <b>Unisat</b> for Testnet4 (compatible with Mempool faucet). Make sure to switch your wallet network to <b>Testnet4</b>.</p>
-                </div>
-                <div className="network-info">
-                  <div className="network-header">
-                    <span>Network Configuration</span>
-                    <span className="network-tag">Testnet4</span>
+                <div className="network-guide">
+                  <div className="guide-header">
+                    <span>⚡ Network Setup: <strong>Testnet4</strong></span>
                   </div>
-                  <div className="network-details">
-                    <div className="network-field">
-                      <label>BTC URL</label>
-                      <code>https://mempool.space/testnet4/api</code>
-                    </div>
-                    <div className="network-field">
-                      <label>Explorer</label>
-                      <code>https://mempool.space/testnet4</code>
-                    </div>
+                  <div className="guide-steps">
+                    <div className="step">1. Open <strong>UniSat Wallet</strong> settings</div>
+                    <div className="step">2. Select <strong>Network</strong> → <strong>Testnet4</strong></div>
+                    <div className="step">3. Address Type: <strong>Native Segwit (P2WPKH)</strong></div>
                   </div>
-                  <p className="network-help">
-                    <strong>UniSat:</strong> Select "Bitcoin Testnet4" in settings.<br />
-                    <strong>Address Type:</strong> Native Segwit (P2WPKH).
-                  </p>
                 </div>
               </div>
             </div>
