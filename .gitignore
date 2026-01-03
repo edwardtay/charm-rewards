@@ -32,3 +32,6 @@ Cargo.lock
 
 # Test
 coverage/
+
+# Private
+private/
