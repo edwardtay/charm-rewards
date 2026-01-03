@@ -362,13 +362,22 @@ outs:
                       📋 Copy Address
                     </button>
                     <a
-                      href="https://coinfaucet.eu/en/btc-testnet/"
+                      href="https://mempool.space/testnet/faucet"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="menu-item"
                       onClick={() => setShowWalletMenu(false)}
                     >
-                      🚰 Get Testnet BTC
+                      🚰 Faucet 1 (Mempool)
+                    </a>
+                    <a
+                      href="https://kuttler.eu/en/bitcoin/btc/faucet/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="menu-item"
+                      onClick={() => setShowWalletMenu(false)}
+                    >
+                      🚰 Faucet 2 (Kuttler)
                     </a>
                     <button onClick={disconnectWallet} className="menu-item danger">
                       🔌 Disconnect
