@@ -236,15 +236,11 @@ function App() {
       })
     } catch (e) {
       console.error(e)
-      // Fallback for simulation
       const isUserReject = e.message?.includes('User rejected') || e.code === 4001
-      if (!isUserReject) {
-        notify('Network error. Using simulation mode.', 'warning')
-        setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-        addTx('mint', amount, `Mint ${amount} REWA (Sim)`, { to: state.address })
-        fireConfetti()
-      } else {
+      if (isUserReject) {
         notify('Transaction rejected', 'error')
+      } else {
+        notify(`Transaction failed: ${e.message}`, 'error')
       }
     }
   }
@@ -276,10 +272,7 @@ function App() {
       })
     } catch (e) {
       console.error(e)
-      notify('Transaction failed. Simulation mode.', 'warning')
-      setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
-      addTx('burn', -reward.cost, reward.name, { rewardId: reward.id })
-      fireConfetti()
+      notify(`Transaction failed: ${e.message}`, 'error')
     }
   }
 

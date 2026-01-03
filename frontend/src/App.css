@@ -36,6 +36,13 @@
   box-sizing: border-box;
 }
 
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+}
+
 body {
   font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg);
