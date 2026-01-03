@@ -83,12 +83,17 @@ function App() {
   const [showWalletMenu, setShowWalletMenu] = useState(false)
   const [devMode, setDevMode] = useState(false)
   const [logs, setLogs] = useState([])
+  const [blockHeight, setBlockHeight] = useState(0)
 
   const addLog = (msg) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 50))
 
-  // Dynamic Stats for Hero
-  const circulating = 12400 + state.totalEarned
-  const burnt = 4200 + state.totalRedeemed // Mock base + user action
+  // Fetch Real Block Height
+  useEffect(() => {
+    fetch('https://mempool.space/testnet4/api/blocks/tip/height')
+      .then(res => res.text())
+      .then(h => setBlockHeight(parseInt(h)))
+      .catch(e => console.error('Failed to fetch block height:', e))
+  }, [])
 
   useEffect(() => {
     if (devMode) addLog(`State updated: Balance=${state.balance} Streak=${state.streak}`)
@@ -438,12 +443,12 @@ outs:
               </p>
               <div className="hero-stats">
                 <div className="hero-stat">
-                  <span className="hero-value">{circulating.toLocaleString()}</span>
-                  <span className="hero-label">Circulating</span>
+                  <span className="hero-value">{blockHeight > 0 ? blockHeight.toLocaleString() : 'Loading...'}</span>
+                  <span className="hero-label">Bitcoin Block</span>
                 </div>
                 <div className="hero-stat">
-                  <span className="hero-value">{burnt.toLocaleString()}</span>
-                  <span className="hero-label">Burned</span>
+                  <span className="hero-value">Testnet4</span>
+                  <span className="hero-label">Network</span>
                 </div>
                 <div className="hero-stat">
                   <span className="hero-value">1M</span>
