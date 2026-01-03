@@ -129,9 +129,9 @@ function App() {
 
   // Wallet detection and connection
   const detectWallets = () => [
-    { id: 'xverse', name: 'Xverse', logo: '/wallets/xverse.svg', desc: 'Recommended for BOS', available: true },
+    { id: 'unisat', name: 'Unisat', logo: '/wallets/unisat.svg', desc: 'Best for Testnet4', available: typeof window !== 'undefined' && !!window.unisat },
+    { id: 'xverse', name: 'Xverse', logo: '/wallets/xverse.svg', desc: 'Sats Connect (Testnet3)', available: true },
     { id: 'leather', name: 'Leather', logo: '/wallets/leather.svg', desc: 'Stacks & Bitcoin', available: typeof window !== 'undefined' && !!window.LeatherProvider },
-    { id: 'unisat', name: 'Unisat', logo: '/wallets/unisat.svg', desc: 'Ordinals & BRC-20', available: typeof window !== 'undefined' && !!window.unisat },
     { id: 'okx', name: 'OKX Wallet', logo: '/wallets/okx.svg', desc: 'Multi-chain', available: typeof window !== 'undefined' && !!window.okxwallet?.bitcoin },
   ]
 
@@ -695,25 +695,27 @@ outs:
                   {!w.available && w.id !== 'xverse' && <span className="wallet-badge">Not installed</span>}
                 </button>
               ))}
+              <div className="alert-box info">
+                <p>ℹ️ <strong>Tip:</strong> Use <b>Unisat</b> for Testnet4 (compatible with Mempool faucet). Make sure to switch your wallet network to <b>Testnet4</b>.</p>
+              </div>
               <div className="network-info">
                 <div className="network-header">
                   <span>Network Configuration</span>
-                  <span className="network-tag">Testnet</span>
+                  <span className="network-tag">Testnet4</span>
                 </div>
                 <div className="network-details">
                   <div className="network-field">
                     <label>BTC URL</label>
-                    <code>https://mempool.space/testnet/api</code>
+                    <code>https://mempool.space/testnet4/api</code>
                   </div>
                   <div className="network-field">
                     <label>Explorer</label>
-                    <code>https://mempool.space/testnet</code>
+                    <code>https://mempool.space/testnet4</code>
                   </div>
                 </div>
                 <p className="network-help">
-                  <strong>Xverse:</strong> Switch to Testnet in wallet settings manually.<br />
-                  <strong>UniSat:</strong> Use "Add Custom Network" with above details.<br />
-                  <strong>Address Type:</strong> Select <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Native Segwit (P2WPKH)</span>.
+                  <strong>UniSat:</strong> Select "Bitcoin Testnet4" in settings.<br />
+                  <strong>Address Type:</strong> Native Segwit (P2WPKH).
                 </p>
               </div>
             </div>
