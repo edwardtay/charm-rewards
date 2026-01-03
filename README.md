@@ -3,17 +3,19 @@
 **OPUS** is a Bitcoin-native protocol demonstrating **App-Specific Rollups** on BitcoinOS.
 It enables programmable, stateful assets (Loyalty Tokens, Stablecoins, etc.) that live directly on Bitcoin L1 as UTXOs, but whose state transitions are governed by off-chain zero-knowledge proofs.
 
-## 🏆 Hackathon Alignment
-
-**Mission: Make Bitcoin Programmable**
-OPUS directly addresses the mission by bringing complex loyalty logic (minting, burning, tiered rewards) to Bitcoin without sidechains or bridges.
-
-| Criteria | Implementation in OPUS |
-| :--- | :--- |
-| **SDK First** | Built using `charms-sdk` 0.10, utilizing standard `app_contract` patterns. |
-| **Working UI** | Complete React dashboard with Xverse/Unisat wallet integration. |
-| **Core Feature** | **zkBTC Loyalty**: Tokens are real UTXOs that change state based on ZK proofs. |
-| **Innovation** | Demonstrates "Burn-to-Redeem" pattern proving ownership without revealing identity. |
+## 💎 Key Features
+ 
+**1. Programmable UTXOs (SDK First)**
+Built efficiently with **Charms SDK v0.10**, OPUS enables standard Bitcoin UTXOs to carry complex state (balances, tiers, history) without bloating the chain.
+ 
+**2. Zero-Knowledge Logic**
+All transaction rules (Mint/Burn) are enforced by **Rust Smart Contracts** executing in a zkVM. The blockchain verifies the *proof* of correctness, not the execution itself, allowing for infinite scalability.
+ 
+**3. Native User Experience**
+A fully functional React dashboard that feels like a modern web app but interacts directly with Bitcoin L1 via Xverse and Unisat. No bridges, no wrapped tokens.
+ 
+**4. Real-World Utility**
+Solves the "Loyalty Fragmentation" problem by turning points into interoperable Bitcoin assets that users actually own.
 
 ## 📐 Architecture
 
@@ -58,4 +60,4 @@ The application is deployed on Bitcoin Testnet4.
 
 ---
 
-Built with ❤️ for the **BitcoinOS Hackathon**
+Built on **BitcoinOS** + **Charms Protocol**
