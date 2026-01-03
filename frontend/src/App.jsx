@@ -555,7 +555,9 @@ outs:
           <div className="dash-stats">
             <div className="dash-stat main">
               <span className="dash-value">{state.balance.toLocaleString()}</span>
-              <span className="dash-label">REWA</span>
+              <span className="dash-label">
+                REWA Points <span title="Off-chain App Points. Mint to convert to on-chain tokens." style={{ cursor: 'help', fontSize: '0.8em', opacity: 0.7 }}>ℹ️</span>
+              </span>
             </div>
             <div className="dash-stat">
               <span className="dash-value">🔥 {state.streak}</span>
