@@ -379,6 +379,8 @@ outs:
                 className="wallet-btn connected"
                 onClick={() => setShowWalletMenu(!showWalletMenu)}
               >
+                <span className="wallet-balance">{state.balance.toLocaleString()} OPUS</span>
+                <span className="wallet-divider">|</span>
                 <span className="wallet-indicator"></span>
                 {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
               </button>
@@ -447,8 +449,8 @@ outs:
                   <span className="hero-label">Bitcoin Block</span>
                 </div>
                 <div className="hero-stat">
-                  <span className="hero-value">Testnet4</span>
-                  <span className="hero-label">Network</span>
+                  <span className="hero-value">{state.txs.length}</span>
+                  <span className="hero-label">ZK Proofs</span>
                 </div>
                 <div className="hero-stat">
                   <span className="hero-value">1M</span>

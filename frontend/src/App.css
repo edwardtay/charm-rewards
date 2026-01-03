@@ -1381,3 +1381,14 @@ body::after {
 .menu-item.danger:hover {
   background: rgba(239, 68, 68, 0.1);
 }
+.wallet-balance {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 8px;
+}
+
+.wallet-divider {
+  color: var(--text2);
+  margin-right: 8px;
+  opacity: 0.5;
+}
