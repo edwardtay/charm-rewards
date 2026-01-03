@@ -214,9 +214,33 @@ function App() {
     setTimeout(() => notify('✅ Verified by BitSNARK!', 'success'), 3000)
   }
 
+  const ensureNetwork = async () => {
+    if (!wallet.connected) {
+      setShowWalletModal(true)
+      return false
+    }
+
+    // Auto-switch for UniSat
+    if (wallet.type === 'unisat' && window.unisat) {
+      try {
+        const net = await window.unisat.getNetwork()
+        if (net !== 'testnet') {
+          await window.unisat.switchNetwork('testnet') // Tries to force testnet
+          notify('🔄 Switched to Testnet', 'success')
+        }
+        return true
+      } catch (e) {
+        notify('⚠️ Please switch wallet to Testnet4 manually', 'error')
+        return false
+      }
+    }
+
+    // For Xverse/Others, we can't easily force switch, so we warn
+    return true
+  }
+
   const handleMint = async (amount) => {
-    // 2. Real Transaction
-    if (!wallet.connected) return setShowWalletModal(true)
+    if (!(await ensureNetwork())) return
 
     runZKSequence() // Trigger ZK Visuals
 
@@ -267,8 +291,7 @@ function App() {
   }
 
   const handleBurn = async (reward) => {
-    // 2. Real Transaction
-    if (!wallet.connected) return setShowWalletModal(true)
+    if (!(await ensureNetwork())) return
     if (state.balance < reward.cost) return notify('Insufficient balance', 'error')
 
     runZKSequence() // Trigger ZK Visuals
@@ -353,7 +376,7 @@ outs:
       $0: ${action === 'mint' ? state.balance + amount : state.balance - amount}
 
 # Action: ${action.toUpperCase()}
-# Amount: ${action === 'mint' ? '+' : '-'}${amount} REWA`
+# Amount: ${action === 'mint' ? '+' : '-'}${amount} OPUS`
 
   const unlockedAch = ACHIEVEMENTS.filter(a => a.check(state))
   const myLeaderPos = LEADERBOARD.findIndex(l => state.totalEarned > l.earned) + 1 || LEADERBOARD.length + 1
