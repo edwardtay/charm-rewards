@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getAddress, AddressPurpose, BitcoinNetworkType } from 'sats-connect'
 import './App.css'
@@ -124,6 +124,7 @@ function App() {
   const connectWallet = async (walletId) => {
     try {
       if (walletId === 'xverse') {
+        // Xverse currently requires manual switch, but we request the specific network
         await getAddress({
           payload: {
             purposes: [AddressPurpose.Payment, AddressPurpose.Ordinals],
@@ -142,6 +143,13 @@ function App() {
           onCancel: () => notify('Connection cancelled', 'error'),
         })
       } else if (walletId === 'unisat' && window.unisat) {
+        // Auto-switch for UniSat
+        try {
+          await window.unisat.switchNetwork('testnet')
+        } catch (e) {
+          console.log('Switch failed, continuing...', e)
+        }
+
         const accounts = await window.unisat.requestAccounts()
         if (accounts[0]) {
           setWallet({ connected: true, type: 'unisat', address: accounts[0] })
@@ -153,7 +161,8 @@ function App() {
         notify('Please install the wallet extension', 'error')
       }
     } catch (err) {
-      notify('Connection failed', 'error')
+      console.error(err)
+      notify('Connection failed: Check network settings', 'error')
     }
   }
 
@@ -242,7 +251,10 @@ outs:
 
       {/* Header */}
       <header className="header">
-        <div className="logo">✨ CharmRewards</div>
+        <div className="logo">
+          <img src="/logo.png" alt="CharmRewards" className="logo-img" />
+          <span>CharmRewards</span>
+        </div>
         <nav className="nav">
           <button className={`nav-btn ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>Protocol</button>
           <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}>Dashboard</button>
@@ -545,7 +557,21 @@ outs:
                 </button>
               ))}
               <div className="network-info">
-                <span>Network</span><span className="network-value">Bitcoin Testnet</span>
+                <div className="network-header">
+                  <span>Network Configuration</span>
+                  <span className="network-tag">Testnet</span>
+                </div>
+                <div className="network-details">
+                  <div className="network-field">
+                    <label>BTC URL</label>
+                    <code>https://mempool.space/testnet/api</code>
+                  </div>
+                  <div className="network-field">
+                    <label>Explorer</label>
+                    <code>https://mempool.space/testnet</code>
+                  </div>
+                </div>
+                <p className="network-help">If using UniSat, add a custom network with these details if auto-switch fails.</p>
               </div>
             </div>
           </div>

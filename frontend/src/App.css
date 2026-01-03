@@ -4,7 +4,9 @@
 :root {
   /* Premium Dark Palette */
   --bg: #050507;
-  --surface: rgba(18, 18, 24, 0.7);
+  --bg-gradient: radial-gradient(circle at 50% 0%, #1a1a24 0%, #050507 100%);
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.06);
   --surface2: rgba(255, 255, 255, 0.05);
   --border: rgba(255, 255, 255, 0.1);
 
@@ -37,8 +39,39 @@
 body {
   font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(255, 159, 28, 0.08), transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(46, 196, 182, 0.05), transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .app {
@@ -64,6 +97,16 @@ body {
 .logo {
   font-size: 18px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
 }
 
 .nav {
@@ -104,34 +147,43 @@ body {
 /* Wallet Button */
 .wallet-btn {
   padding: 10px 20px;
-  background: var(--primary);
-  color: #000;
-  border: none;
-  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.15s;
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .wallet-btn:hover {
-  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .wallet-btn.connected {
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--success);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.wallet-btn.connected:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .wallet-indicator {
-  width: 8px;
-  height: 8px;
-  background: var(--success);
+  width: 6px;
+  height: 6px;
+  background: currentColor;
   border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
 }
 
 /* ========== HOME VIEW (Technical) ========== */
@@ -197,12 +249,31 @@ body {
 }
 
 .feature {
-  background: var(--surface2);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 32px 24px;
   text-align: center;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.feature:hover {
+  transform: translateY(-4px);
+  background: var(--surface-hover);
+  border-color: rgba(255, 159, 28, 0.3);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
 .feature:hover {
@@ -538,15 +609,24 @@ body {
 .dash-stat {
   flex: 1;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 32px;
   text-align: center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.02);
   box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.dash-stat:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .dash-stat.main {
-  border-color: var(--primary);
+  background: radial-gradient(circle at top right, rgba(255, 159, 28, 0.1), transparent 60%);
+  border-color: rgba(255, 159, 28, 0.3);
 }
 
 .dash-value {
@@ -688,19 +768,30 @@ body {
 }
 
 .btn-sm {
-  padding: 6px 12px;
-  background: var(--primary);
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 8px 16px;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sm:hover:not(:disabled) {
+  background: var(--primary);
+  color: #000;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 159, 28, 0.3);
 }
 
 .btn-sm:disabled {
-  background: var(--surface2);
+  background: rgba(255, 255, 255, 0.02);
   color: var(--text2);
+  border-color: transparent;
+  cursor: not-allowed;
 }
 
 /* Achievements */
@@ -1087,4 +1178,56 @@ body {
     flex-direction: column;
     gap: 16px;
   }
+}
+
+.network-info {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.network-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.network-tag {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.network-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.network-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.network-field code {
+  background: var(--surface2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+
+.network-help {
+  margin-top: 8px;
+  color: var(--text2);
+  font-style: italic;
+  font-size: 10px;
 }
