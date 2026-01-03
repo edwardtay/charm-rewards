@@ -336,6 +336,15 @@ outs:
                     <button onClick={copyAddress} className="menu-item">
                       📋 Copy Address
                     </button>
+                    <a
+                      href="https://coinfaucet.eu/en/btc-testnet/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="menu-item"
+                      onClick={() => setShowWalletMenu(false)}
+                    >
+                      🚰 Get Testnet BTC
+                    </a>
                     <button onClick={disconnectWallet} className="menu-item danger">
                       🔌 Disconnect
                     </button>
