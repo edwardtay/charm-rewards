@@ -117,11 +117,17 @@ function App() {
           // If it's a legacy random ID (not 64 chars hex), just auto-confirm to clean up
           if (tx.id.length !== 64) return { ...tx, status: 'confirmed' }
 
-          const res = await fetch(`https://mempool.space/testnet4/api/tx/${tx.id}/status`)
+          // Try Testnet4 first
+          let res = await fetch(`https://mempool.space/testnet4/api/tx/${tx.id}/status`)
+          // If 404, try Testnet3 (Legacy) fallback
+          if (res.status === 404) {
+            res = await fetch(`https://mempool.space/testnet/api/tx/${tx.id}/status`)
+          }
+
           if (!res.ok) return tx
           const data = await res.json()
 
-          if (data.confirmed) {
+          if (data.confirmed || data.block_height) {
             updated = true
             notify(`Transaction Confirmed!`, 'success')
             return { ...tx, status: 'confirmed' }
@@ -255,9 +261,10 @@ function App() {
     if (wallet.type === 'unisat' && window.unisat) {
       try {
         const net = await window.unisat.getNetwork()
-        if (net !== 'testnet') {
-          await window.unisat.switchNetwork('testnet') // Tries to force testnet
-          notify('🔄 Switched to Testnet', 'success')
+        // UniSat uses 'testnet' for Testnet3 and 'testnet4' for Testnet4
+        if (net !== 'testnet4') {
+          await window.unisat.switchNetwork('testnet4')
+          notify('🔄 Switched to Testnet4', 'success')
         }
         return true
       } catch (e) {
