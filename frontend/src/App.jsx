@@ -460,7 +460,7 @@ outs:
                 <pre className="code-block">{RUST_CONTRACT}</pre>
               )}
               {techTab === 'spell' && (
-                <pre className="code-block">{generateSpell('mint', 100)}</pre>
+                <pre className="code-block">{generateSpell('mint', 1000)}</pre>
               )}
               {techTab === 'proof' && (
                 <div className="proof-pipeline animated">
@@ -480,8 +480,8 @@ outs:
           <section className="demo-section">
             <h2>⚡ Try It</h2>
             <div className="demo-actions">
-              <button className="demo-btn mint" onClick={() => handleMint(100)}>
-                <span>Mint 100 REWA</span>
+              <button className="demo-btn mint" onClick={() => handleMint(1000)}>
+                <span>Mint 1000 REWA</span>
                 <small>Creates enchanted UTXO</small>
               </button>
               <button className="demo-btn burn" onClick={() => handleBurn(REWARDS[0])} disabled={state.balance < 200}>
