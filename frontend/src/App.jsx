@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getAddress, AddressPurpose, BitcoinNetworkType } from 'sats-connect'
+import { getAddress, sendBtcTransaction, AddressPurpose, BitcoinNetworkType } from 'sats-connect'
 import './App.css'
 
 const STORAGE_KEY = 'charmrewards_v5'
@@ -183,19 +183,72 @@ function App() {
     }))
   }
 
-  const handleMint = (amount) => {
-    setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-    addTx('mint', amount, `Mint ${amount} REWA`, { to: state.address })
-    notify(`+${amount} ${TOKEN.ticker}`)
-    fireConfetti()
+  const handleMint = async (amount) => {
+    if (!wallet.connected) return setShowWalletModal(true)
+
+    // Real Testnet Transaction: Send 'amount' sats to self to record on-chain
+    try {
+      await sendBtcTransaction({
+        payload: {
+          network: { type: BitcoinNetworkType.Testnet },
+          recipients: [
+            {
+              address: wallet.address,
+              amountSats: BigInt(amount), // Mint amount = Sats amount for demo
+            },
+          ],
+          senderAddress: wallet.address,
+        },
+        onFinish: (response) => {
+          setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
+          addTx('mint', amount, `Mint ${amount} REWA`, { to: state.address, id: response })
+          notify(`+${amount} ${TOKEN.ticker} (TX Sent)`)
+          fireConfetti()
+        },
+        onCancel: () => notify('Mint cancelled', 'error'),
+      })
+    } catch (e) {
+      console.error(e)
+      // Fallback for simulation if real TX fails (e.g. insufficient funds) or user wants quick demo
+      notify('Transaction failed. Using simulation mode.', 'warning')
+      setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
+      addTx('mint', amount, `Mint ${amount} REWA (Sim)`, { to: state.address })
+      fireConfetti()
+    }
   }
 
-  const handleBurn = (reward) => {
+  const handleBurn = async (reward) => {
+    if (!wallet.connected) return setShowWalletModal(true)
     if (state.balance < reward.cost) return notify('Insufficient balance', 'error')
-    setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
-    addTx('burn', -reward.cost, reward.name, { rewardId: reward.id })
-    notify(`Redeemed: ${reward.name}`)
-    fireConfetti()
+
+    // Real Burn: Send sats to a "burn" (return to self for now to save user funds on testnet)
+    try {
+      await sendBtcTransaction({
+        payload: {
+          network: { type: BitcoinNetworkType.Testnet },
+          recipients: [
+            {
+              address: wallet.address,
+              amountSats: BigInt(Math.max(1, reward.cost)), // Burn cost equivalent
+            },
+          ],
+          senderAddress: wallet.address,
+        },
+        onFinish: (response) => {
+          setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
+          addTx('burn', -reward.cost, reward.name, { rewardId: reward.id, id: response })
+          notify(`Redeemed: ${reward.name}`)
+          fireConfetti()
+        },
+        onCancel: () => notify('Burn cancelled', 'error'),
+      })
+    } catch (e) {
+      console.error(e)
+      notify('Transaction failed. Simulation mode.', 'warning')
+      setState(s => ({ ...s, balance: s.balance - reward.cost, totalRedeemed: s.totalRedeemed + reward.cost }))
+      addTx('burn', -reward.cost, reward.name, { rewardId: reward.id })
+      fireConfetti()
+    }
   }
 
   const handleSpin = () => {
