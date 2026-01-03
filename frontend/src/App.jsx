@@ -712,7 +712,8 @@ outs:
                 </div>
                 <p className="network-help">
                   <strong>Xverse:</strong> Switch to Testnet in wallet settings manually.<br />
-                  <strong>UniSat:</strong> Use "Add Custom Network" with above details.
+                  <strong>UniSat:</strong> Use "Add Custom Network" with above details.<br />
+                  <strong>Address Type:</strong> Select <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Native Segwit (P2WPKH)</span>.
                 </p>
               </div>
             </div>
