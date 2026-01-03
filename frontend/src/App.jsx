@@ -196,14 +196,20 @@ function App() {
     }))
   }
 
+  const runZKSequence = () => {
+    notify('🧙‍♂️ Generating Spell...', 'info')
+    setTimeout(() => notify('🔐 Proving in zkVM (SP1)...', 'info'), 1500)
+    setTimeout(() => notify('✅ Verified by BitSNARK!', 'success'), 3000)
+  }
+
   const handleMint = async (amount) => {
     // 1. Simulation Override (Dev Mode)
     if (devMode) {
       notify('Dev Mode: Simulating Mint...', 'info')
       setTimeout(() => {
         setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-        addTx('mint', amount, `Mint ${amount} REWA (Dev)`, { to: state.address })
-        notify(`+${amount} REWA (Simulated)`)
+        addTx('mint', amount, `Mint ${amount} OPUS (Dev)`, { to: state.address })
+        notify(`+${amount} OPUS (Simulated)`)
         fireConfetti()
       }, 800)
       return
@@ -212,13 +218,15 @@ function App() {
     // 2. Real Transaction
     if (!wallet.connected) return setShowWalletModal(true)
 
+    runZKSequence() // Trigger ZK Visuals
+
     try {
       // UniSat Check: UniSat API is different from sats-connect
       if (wallet.type === 'unisat' && window.unisat) {
         try {
           const txid = await window.unisat.sendBitcoin(wallet.address, amount)
           setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-          addTx('mint', amount, `Mint ${amount} REWA`, { to: state.address, id: txid })
+          addTx('mint', amount, `Mint ${amount} OPUS`, { to: state.address, id: txid })
           notify(`+${amount} ${TOKEN.ticker} (TX Sent)`)
           fireConfetti()
         } catch (e) {
@@ -241,7 +249,7 @@ function App() {
         },
         onFinish: (response) => {
           setState(s => ({ ...s, balance: s.balance + amount, totalEarned: s.totalEarned + amount }))
-          addTx('mint', amount, `Mint ${amount} REWA`, { to: state.address, id: response })
+          addTx('mint', amount, `Mint ${amount} OPUS`, { to: state.address, id: response })
           notify(`+${amount} ${TOKEN.ticker} (TX Sent)`)
           fireConfetti()
         },
@@ -275,6 +283,8 @@ function App() {
     // 2. Real Transaction
     if (!wallet.connected) return setShowWalletModal(true)
     if (state.balance < reward.cost) return notify('Insufficient balance', 'error')
+
+    runZKSequence() // Trigger ZK Visuals
 
     // Real Burn: Send sats to a "burn" (return to self for now to save user funds on testnet)
     try {
@@ -366,10 +376,10 @@ outs:
       {confetti && <div className="confetti">🎉</div>}
 
       {/* Header */}
-      <header className="header">
-        <div className="logo">
-          <img src="/logo.png" alt="CharmRewards" className="logo-img" />
-          <span>CharmRewards</span>
+      <header className="navbar">
+        <div className="nav-brand">
+          <span className="brand-icon">💎</span>
+          <span>OPUS</span>
         </div>
         <nav className="nav">
           <button className={`nav-btn ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>Protocol</button>

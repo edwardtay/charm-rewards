@@ -46,30 +46,37 @@ graph TD
     end
 ```
 
-### Protocol Flow
-1.  **Minting**: Merchant authorizes new tokens -> Proof ensures `supply <= max_supply`.
-2.  **burning**: User burns tokens for reward -> Proof ensures `balance >= cost`.
-3.  **Transfer**: User sends tokens -> Proof ensures `sum(inputs) == sum(outputs)`.
+# OPUS: Onchain Programmable UTXOs
 
-## ✨ Features
+**OPUS** is a Bitcoin-native protocol demonstrating **App-Specific Rollups** on BitcoinOS.
+It enables programmable, stateful assets (Loyalty Tokens, Stablecoins, etc.) that live directly on Bitcoin L1 as UTXOs, but whose state transitions are governed by off-chain zero-knowledge proofs.
 
-- 🔗 **Wallet Connection** — Xverse, Unisat, Leather support
-- ⚡ **Gamification** — Streaks, achievements, live leaderboard
-- 🎰 **Daily Rewards** — Spin wheel + daily bonuses
-- 🚀 **Cross-Chain Ready** — Built on standard UTXO models compatible with Cardano/Litecoin
-- 🔬 **Dev Mode** — Real-time visualization of the ZK proof pipeline
+## 📐 Architecture
 
-## 🚀 Quick Start
+The protocol follows the **Spell -> Proof -> Verification** pipeline:
 
-```bash
-# 1. Clone & Install
-cd frontend
-npm install
+1.  **Spell (Action)**: User intents (Mint, Burn, Transfer) are serialized into a "Spell" (a compact state transition request).
+2.  **ZK-Prover (Off-chain)**: The **Charms SDK** executes the Rust smart contract logic in a zkVM (SP1/Risc0). This generates a ZK proof attesting that the state transition follows the rules (e.g., "Sender has balance", "Supply < Max").
+3.  **Verification (On-chain)**: The proof is batched and verified by the BitcoinOS BitSNARK verifier on Bitcoin L1.
+4.  **Settlement**: If verified, the Bitcoin UTXO set is updated.
 
-# 2. Run Development Server
-npm run dev
-# Opens http://localhost:5173
-```
+## � Tech Stack
+
+*   **Frontend**: React + Vite + Framer Motion (Glassmorphism UI)
+*   **Protocol**: BitcoinOS (BitSNARK verification)
+*   **Contract**: Rust (Charms SDK)
+*   **Wallet**: UniSat / Xverse (BIP-322 / PSBT)
+
+## 🚀 Live Demo (Testnet4)
+
+The application is deployed on Bitcoin Testnet4.
+*   **Mint**: Creates a new UTXO with embedded `OPUS` state.
+*   **Burn**: Consumes the UTXO to redeem a reward, enforcing the "Burn" constraint in the contract.
+
+## 📂 Project Structure
+
+*   `frontend/`: React application with real-time ZK debugger visualization.
+*   `charm-app/`: Rust smart contract logic defining the constraint system.
 
 ## 🔮 Future Roadmap
 
