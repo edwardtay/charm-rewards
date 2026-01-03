@@ -59,8 +59,16 @@ pub struct Witness {
 
 /// Main app contract - validates all token operations
 /// 
-/// This function is called by the Charms zkVM to verify that a spell
-/// (token operation) is valid according to our rules.
+/// This function is the heart of the zkVM verification logic. It is executed
+/// off-chain by the Prover, and the execution trace is cryptographically 
+/// proven. The resulting proof certified that this code returned `true`
+/// for the given inputs.
+///
+/// # Constraint Checking
+/// The contract enforces:
+/// 1. **Supply Integrity**: Total supply never exceeds `max_supply`.
+/// 2. **Authentication**: Only the issuer can mint; only owners can burn.
+/// 3. **Conservation**: Sum of inputs == Sum of outputs (for transfers).
 #[no_mangle]
 pub fn app_contract(
     app: &App,
@@ -97,10 +105,11 @@ pub fn app_contract(
 }
 
 /// Verify token initialization
-/// Rules:
-/// - Must create exactly one NFT output
-/// - NFT state must contain valid TokenState
-/// - max_supply must be > 0
+/// 
+/// # ZK Constraints
+/// - **Uniqueness**: The `app_id` is derived from the Genesis UTXO, ensuring global uniqueness.
+/// - **State Initialization**: The first UTXO is created with `remaining = max_supply`.
+/// - **Immutable Rules**: The `max_supply` and `ticker` are permanently fixed in the contract ID.
 fn verify_init(
     app: &App,
     tx: &Transaction,
@@ -138,10 +147,13 @@ fn verify_init(
 }
 
 /// Verify token minting
-/// Rules:
-/// - Must have valid NFT input (merchant authority)
-/// - amount <= remaining supply
-/// - remaining supply decreases by amount
+/// 
+/// # ZK Constraints
+/// - **Authority**: The input must prove possession of the "Mint Authority" NFT.
+/// - **Supply Cap**: The contract checks `amount <= state.remaining`.
+/// - **State Transition**: The new state **must** have `remaining_new = remaining_old - amount`.
+/// 
+/// This prevents inflation beyond the defined cap.
 fn verify_mint(
     app: &App,
     tx: &Transaction,

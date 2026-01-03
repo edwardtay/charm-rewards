@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { getAddress, AddressPurpose, BitcoinNetworkType } from 'sats-connect'
 import './App.css'
 
@@ -76,6 +77,14 @@ function App() {
   const [confetti, setConfetti] = useState(false)
   const [showSpin, setShowSpin] = useState(false)
   const [spinResult, setSpinResult] = useState(null)
+  const [devMode, setDevMode] = useState(false)
+  const [logs, setLogs] = useState([])
+
+  const addLog = (msg) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 50))
+
+  useEffect(() => {
+    if (devMode) addLog(`State updated: Balance=${state.balance} Streak=${state.streak}`)
+  }, [state, devMode])
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) }, [state])
   useEffect(() => {
@@ -247,12 +256,22 @@ outs:
           ) : (
             <button className="wallet-btn" onClick={() => setShowWalletModal(true)}>Connect Wallet</button>
           )}
+          <button className={`nav-btn ${devMode ? 'active' : ''}`} onClick={() => setDevMode(!devMode)} title="Developer Mode">
+            {devMode ? '👨‍💻 ON' : '👨‍💻'}
+          </button>
         </div>
       </header>
 
       {/* HOME VIEW - Technical Focus */}
+      {/* HOME VIEW - Technical Focus */}
       {view === 'home' && (
-        <main className="main-home">
+        <motion.main
+          className="main-home"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
           {/* Hero */}
           <section className="hero">
             <h1>Bitcoin-Native Loyalty Tokens</h1>
@@ -360,12 +379,18 @@ outs:
               </div>
             </section>
           )}
-        </main>
+        </motion.main>
       )}
 
       {/* DASHBOARD VIEW - Gamification */}
       {view === 'dashboard' && (
-        <main className="main-dashboard">
+        <motion.main
+          className="main-dashboard"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+        >
           {/* Stats Bar */}
           <div className="dash-stats">
             <div className="dash-stat main">
@@ -491,7 +516,7 @@ outs:
               </div>
             </section>
           </div>
-        </main>
+        </motion.main>
       )}
 
       {/* Footer */}
@@ -536,6 +561,29 @@ outs:
           </div>
         </div>
       )}
+
+      {/* Dev Console */}
+      <AnimatePresence>
+        {devMode && (
+          <motion.div
+            className="dev-console"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: '200px', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+          >
+            <div className="dev-header">
+              <span>🔧 BitcoinOS zkVM Debugger</span>
+              <button onClick={() => setLogs([])}>Clear</button>
+            </div>
+            <div className="dev-logs">
+              {logs.length === 0 && <span className="log-empty">Waiting for protocol events...</span>}
+              {logs.map((log, i) => (
+                <div key={i} className="log-entry">{log}</div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Toast */}
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
